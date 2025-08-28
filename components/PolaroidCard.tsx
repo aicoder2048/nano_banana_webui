@@ -4,7 +4,7 @@
 */
 import React from 'react';
 import { motion, useAnimation } from 'framer-motion';
-import { RefreshIcon } from './icons';
+import { RefreshIcon, MagnifyPlusIcon, DownloadSingleIcon } from './icons';
 import Spinner from './Spinner';
 
 type ImageStatus = 'pending' | 'done' | 'error';
@@ -43,6 +43,51 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({
         }
     };
 
+    const handleDownload = (e?: React.MouseEvent) => {
+        if (e) {
+            e.stopPropagation();
+        }
+        if (imageState.status === 'done' && imageState.url) {
+            const link = document.createElement('a');
+            link.href = imageState.url;
+            link.download = `${decade}-style-image.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+    const handleZoom = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (imageState.status === 'done' && imageState.url) {
+            // 如果是 data URL，转换为 blob URL 再打开
+            if (imageState.url.startsWith('data:')) {
+                try {
+                    // 将 data URL 转换为 blob
+                    fetch(imageState.url)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const blobUrl = URL.createObjectURL(blob);
+                            window.open(blobUrl, '_blank');
+                            // 清理 blob URL（延迟一下确保标签页能加载）
+                            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to create blob URL:', err);
+                            // 回退到直接打开 data URL
+                            window.open(imageState.url, '_blank');
+                        });
+                } catch (err) {
+                    console.error('Failed to process data URL:', err);
+                    window.open(imageState.url, '_blank');
+                }
+            } else {
+                // 对于普通 URL，直接打开
+                window.open(imageState.url, '_blank');
+            }
+        }
+    };
+
     const cardContent = () => {
         switch (imageState?.status) {
             case 'pending':
@@ -64,17 +109,37 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({
                 );
             case 'done':
                 return (
-                    <motion.div className="relative w-full h-full">
+                    <motion.div className="relative w-full h-full group/image">
                         <motion.img 
                             key={imageState.url} // Re-trigger animation on URL change
                             src={imageState.url} 
                             alt={`Generated image for ${decade}`} 
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover cursor-pointer"
                             initial={{ filter: 'sepia(1) contrast(0.5) brightness(0.7)', opacity: 0.8 }}
                             animate={{ filter: 'sepia(0) contrast(1) brightness(1)', opacity: 1 }}
                             transition={{ duration: 1.5, ease: 'easeOut', delay: 0.5 }}
+                            onClick={handleZoom}
                         />
                         <div className="absolute inset-0 bg-black transition-opacity duration-1000" style={{ animation: 'developing 1.5s ease-out forwards' }}/>
+                        
+                        {/* 操作按钮 */}
+                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/image:opacity-100 transition-opacity">
+                            <button
+                                onClick={handleZoom}
+                                className="p-1.5 bg-black/70 text-white rounded-full hover:bg-black/90 transition-colors"
+                                title="放大查看"
+                            >
+                                <MagnifyPlusIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={handleDownload}
+                                className="p-1.5 bg-black/70 text-white rounded-full hover:bg-black/90 transition-colors"
+                                title="下载图片"
+                            >
+                                <DownloadSingleIcon className="w-4 h-4" />
+                            </button>
+                        </div>
+                        
                         <style>{`
                             @keyframes developing {
                                 0% { opacity: 0.6; }
@@ -90,19 +155,41 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({
 
     if (isMobile) {
         return (
-            <div className="w-full bg-[#fdf5e6] p-3 rounded-lg shadow-lg font-['Permanent_Marker'] text-gray-800 flex flex-col gap-3">
-                <div className="w-full aspect-square bg-gray-300 shadow-inner overflow-hidden">
-                    {cardContent()}
+            <>
+                <div className="w-full bg-[#fdf5e6] p-3 rounded-lg shadow-lg font-['Permanent_Marker'] text-gray-800 flex flex-col gap-3">
+                    <div className="w-full aspect-square bg-gray-300 shadow-inner overflow-hidden">
+                        {cardContent()}
+                    </div>
+                    <div className="flex justify-between items-center px-1">
+                        <p className="text-2xl">{decade}</p>
+                        <div className="flex items-center gap-2">
+                            {imageState?.status === 'done' && (
+                                <>
+                                    <button 
+                                        onClick={handleZoom}
+                                        className="p-2 bg-gray-200/50 rounded-full hover:bg-gray-300 active:scale-90 transition-transform"
+                                        title="放大查看"
+                                    >
+                                        <MagnifyPlusIcon className="w-4 h-4"/>
+                                    </button>
+                                    <button 
+                                        onClick={handleDownload}
+                                        className="p-2 bg-gray-200/50 rounded-full hover:bg-gray-300 active:scale-90 transition-transform"
+                                        title="下载图片"
+                                    >
+                                        <DownloadSingleIcon className="w-4 h-4"/>
+                                    </button>
+                                </>
+                            )}
+                            {imageState?.status !== 'pending' && (
+                                <button onClick={onRegenerate} className="p-2 bg-gray-200/50 rounded-full hover:bg-gray-300 active:scale-90 transition-transform">
+                                    <RefreshIcon className="w-5 h-5"/>
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 </div>
-                <div className="flex justify-between items-center px-1">
-                    <p className="text-2xl">{decade}</p>
-                    {imageState?.status !== 'pending' && (
-                        <button onClick={onRegenerate} className="p-2 bg-gray-200/50 rounded-full hover:bg-gray-300 active:scale-90 transition-transform">
-                            <RefreshIcon className="w-5 h-5"/>
-                        </button>
-                    )}
-                </div>
-            </div>
+            </>
         );
     }
     

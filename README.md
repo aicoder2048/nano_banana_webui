@@ -24,6 +24,7 @@ Aice PS 是一款功能强大的网页版 AI 照片编辑器，利用 Google ais
 - **纹理叠加**: 为图片添加各种创意纹理，如裂纹漆、木纹、金属拉丝等。
 - **一键抠图**: 自动移除图片背景，生成透明背景的 PNG 图像。
 - **AI 灵感建议**: AI 会分析您的图片，并为您推荐合适的滤镜、调整和纹理效果。
+- **Past Forward 时光穿越**: 将照片中的人物重新想象成不同年代的风格（1950s-2000s），包括服装、发型、照片质感等。支持单张图片放大查看和下载。
 - **基础编辑**: 包括无限制的裁剪、撤销/重做、对比原图、保存和下载。
 
 ## 🛠️ 技术栈
@@ -62,34 +63,61 @@ Aice PS 的强大功能由 Google 最先进的一系列生成式 AI 模型驱动
 
 该项目无需复杂的构建工具，可以直接在浏览器中运行。
 
-### 1. 准备环境
+### 1. 安装依赖
+
+首先克隆仓库并安装依赖：
+
+```bash
+git clone <repository-url>
+cd NanoBananaWebUI
+npm install
+```
+
+### 2. 准备环境
 
 - 一个现代的网页浏览器 (如 Chrome, Firefox, Edge)。
-- 一个简单的本地 Web 服务器。如果您安装了 Node.js，可以使用 `serve`：
-  ```bash
-  npm install -g serve
-  serve .
-  ```
-  或者，如果您安装了 Python 3，可以使用：
-  ```bash
-  python -m http.server
-  ```
+- Node.js (推荐版本 16+)
 
-### 2. 配置 API 密钥
+**推荐方式 - 使用 Vite 开发服务器：**
+```bash
+npm run dev
+```
+
+**替代方式 - 使用静态服务器：**
+如果您想使用静态服务器，可以使用 `serve`：
+```bash
+npm install -g serve
+serve .
+```
+或者，如果您安装了 Python 3，可以使用：
+```bash
+python -m http.server
+```
+
+### 3. 配置 API 密钥
 
 要使用 AI 功能，您需要一个 Google Gemini API 密钥。
 
 - **获取密钥**: 访问 [Google AI Studio](https://aistudio.google.com/app/apikey) 创建您的免费 API 密钥。
 - **配置密钥**:
-  1. 在本地服务器上运行项目后，在浏览器中打开应用。
-  2. 点击页面右上角的**设置图标 (⚙️)**。
-  3. 将您获取的 API 密钥粘贴到输入框中，然后点击“保存密钥”。
-  
-密钥将安全地保存在您浏览器的 `localStorage` 中，仅供本地开发使用。
+  1. 在项目根目录下创建 `.env` 文件：
+     ```bash
+     echo "GEMINI_API_KEY=你的API密钥" > .env
+     ```
+  2. 或者在终端中设置环境变量：
+     ```bash
+     export GEMINI_API_KEY=你的API密钥
+     ```
 
-### 3. 运行应用
+**重要**: 确保不要将 `.env` 文件提交到 git 仓库中。
 
-启动本地 Web 服务器后，在浏览器中访问对应的地址（通常是 `http://localhost:3000` 或 `http://localhost:8000`），即可开始使用。
+### 4. 运行应用
+
+- 使用 `npm run dev` 时，应用会在 `http://localhost:5173` 启动（Vite 默认端口）
+- 使用 `serve .` 时，通常在 `http://localhost:3000` 
+- 使用 Python 服务器时，通常在 `http://localhost:8000`
+
+在浏览器中访问对应地址即可开始使用。
 
 ## 部署到 Vercel (推荐)
 
@@ -112,7 +140,7 @@ Aice PS 的强大功能由 Google 最先进的一系列生成式 AI 模型驱动
 
 1.  展开 **Environment Variables** (环境变量) 部分。
 2.  添加一个新的环境变量：
-    - **Name**: `API_KEY`
+    - **Name**: `GEMINI_API_KEY`
     - **Value**: 粘贴您从 Google AI Studio 获取的 Gemini API 密钥。
 3.  点击 "Add" 保存变量。
 
