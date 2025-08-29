@@ -294,7 +294,7 @@ const EditorView: React.FC<{
     runGenerativeTask(() => generateAdjustedImage(currentImageFile, prompt));
   };
   
-  const handleApplyFusion = async (sourceImages: File[], prompt: string, count: number = 1) => {
+  const handleApplyFusion = async (sourceImages: File[], prompt: string, count: number = 1, variationIntensity?: string) => {
     setLastAction({ type: 'fusion', prompt, sourceImages });
     setFusionResults([]); // 清空之前的结果
     
@@ -306,7 +306,7 @@ const EditorView: React.FC<{
       setIsLoading(true);
       setError(null);
       try {
-        const results = await generateFusedImages(currentImageFile, sourceImages, prompt, count);
+        const results = await generateFusedImages(currentImageFile, sourceImages, prompt, count, variationIntensity);
         setFusionResults(results);
         // 如果需要，可以将第一张设为当前图片
         if (results.length > 0) {

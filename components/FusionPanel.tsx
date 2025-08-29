@@ -7,7 +7,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { UploadIcon, XMarkIcon } from './icons';
 
 interface FusionPanelProps {
-  onApplyFusion: (sourceImages: File[], prompt: string, count: number) => void;
+  onApplyFusion: (sourceImages: File[], prompt: string, count: number, variationIntensity?: string) => void;
   isLoading: boolean;
   onError: (message: string) => void;
   fusionResults?: string[];
@@ -23,6 +23,7 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
   const [prompt, setPrompt] = useState('');
   const [imageCount, setImageCount] = useState(1);
   const [showVariationHint, setShowVariationHint] = useState(false);
+  const [variationIntensity, setVariationIntensity] = useState<'subtle' | 'moderate' | 'dramatic'>('moderate');
   
   const fileInputRef1 = useRef<HTMLInputElement>(null);
   const fileInputRef2 = useRef<HTMLInputElement>(null);
@@ -30,7 +31,7 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
   const handleApply = () => {
     const sourceFiles = [sourceImageFile1, sourceImageFile2].filter(Boolean) as File[];
     if (sourceFiles.length > 0 && prompt.trim()) {
-        onApplyFusion(sourceFiles, prompt, imageCount);
+        onApplyFusion(sourceFiles, prompt, imageCount, variationIntensity);
     }
   };
 
@@ -141,6 +142,36 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
           </div>
         )}
       </div>
+      
+      {/* 变化强度选择器 */}
+      {imageCount > 1 && (
+        <div className="w-full flex flex-col items-center gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400">变化强度：</span>
+            <div className="flex gap-2">
+              {[
+                { key: 'subtle', label: '微调', desc: '轻微变化' },
+                { key: 'moderate', label: '中等', desc: '明显变化' },
+                { key: 'dramatic', label: '强烈', desc: '大幅变化' }
+              ].map(intensity => (
+                <button
+                  key={intensity.key}
+                  onClick={() => setVariationIntensity(intensity.key as 'subtle' | 'moderate' | 'dramatic')}
+                  className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                    variationIntensity === intensity.key 
+                      ? 'bg-amber-600 text-white shadow-lg shadow-amber-500/30' 
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  disabled={isLoading}
+                  title={intensity.desc}
+                >
+                  {intensity.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="w-full flex gap-2">
         <input

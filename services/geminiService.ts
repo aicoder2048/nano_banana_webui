@@ -154,12 +154,16 @@ const callImageEditingModel = async (parts: any[], action: string, seed?: number
     try {
         const ai = getGoogleAI();
         
-        // 构建请求配置 - 简化配置，避免不支持的参数
+        // 构建请求配置，包含变化参数
         const requestConfig: any = {
             model: 'gemini-2.5-flash-image-preview',
             contents: { parts: parts },
             config: {
                 responseModalities: [Modality.IMAGE, Modality.TEXT],
+                // 添加温度控制以增加变化
+                temperature: temperature ?? 0.9,
+                // 如果API支持seed参数，可以尝试添加
+                ...(seed !== undefined && { seed: seed })
             }
         };
         
@@ -268,22 +272,47 @@ export const generateFusedImages = async (
     mainImage: File, 
     sourceImages: File[], 
     prompt: string, 
-    count: number = 1
+    count: number = 1,
+    variationIntensity: string = 'moderate'
 ): Promise<string[]> => {
     try {
         const results: string[] = [];
         
-        // 定义简单的变化修饰词
-        const variations = [
-            "version 1 with standard rendering",
-            "version 2 with slightly different composition", 
-            "version 3 with alternative approach",
-            "version 4 with creative interpretation",
-            "version 5 with subtle variations",
-            "version 6 with different perspective",
-            "version 7 with unique style",
-            "version 8 with artistic touch"
-        ];
+        // 根据变化强度定义不同的艺术变化描述
+        const variationSets = {
+            subtle: [
+                "standard composition with natural lighting and balanced colors",
+                "slightly warmer color temperature with gentle shadows",
+                "marginally enhanced contrast with soft highlights",
+                "delicate color grading with subtle tone adjustments",
+                "refined lighting with gentle depth enhancement",
+                "minor composition tweaks with natural flow",
+                "soft focus variations with subtle detail enhancement",
+                "gentle color harmony with minimal stylistic changes"
+            ],
+            moderate: [
+                "standard composition with balanced lighting and natural colors",
+                "dynamic composition with enhanced lighting and improved contrast", 
+                "soft artistic style with warm color palette and gentle shadows",
+                "creative interpretation with vibrant colors and defined highlights",
+                "minimalist approach with refined tones and clean composition",
+                "cinematic perspective with enhanced depth of field and textures",
+                "artistic style with painterly effects and flowing composition",
+                "modern style with sharp details and contemporary color grading"
+            ],
+            dramatic: [
+                "bold cinematic composition with dramatic lighting and high contrast",
+                "avant-garde artistic interpretation with experimental color schemes",
+                "surreal creative approach with intense atmospheric effects", 
+                "hyper-stylized version with extreme color saturation and effects",
+                "theatrical composition with dramatic shadows and bold highlights",
+                "abstract artistic interpretation with unconventional perspectives",
+                "fantasy-inspired rendering with magical lighting and ethereal effects",
+                "cyberpunk-style interpretation with neon colors and futuristic atmosphere"
+            ]
+        };
+        
+        const variations = variationSets[variationIntensity as keyof typeof variationSets] || variationSets.moderate;
         
         // 预先准备图片数据，避免重复处理
         const mainImagePart = await fileToGenerativePart(mainImage);
@@ -307,7 +336,29 @@ export const generateFusedImages = async (
                 const textPart = { text: fullPrompt };
                 const allParts = [mainImagePart, ...sourceImageParts.map(p => ({ inlineData: p.inlineData })), textPart];
                 
-                const result = await callImageEditingModel(allParts, `合成 ${i + 1}/${count}`);
+                // 为每张图片生成不同的种子和温度
+                const seed = Math.floor(Math.random() * 1000000);
+                
+                // 根据变化强度调整温度范围
+                let baseTemp, tempRange;
+                switch (variationIntensity) {
+                    case 'subtle':
+                        baseTemp = 0.6;
+                        tempRange = 0.2; // 0.6 到 0.8
+                        break;
+                    case 'dramatic':
+                        baseTemp = 0.8;
+                        tempRange = 0.5; // 0.8 到 1.3
+                        break;
+                    default: // moderate
+                        baseTemp = 0.7;
+                        tempRange = 0.3; // 0.7 到 1.0
+                        break;
+                }
+                
+                const temperature = baseTemp + (i * tempRange / Math.max(count - 1, 1));
+                
+                const result = await callImageEditingModel(allParts, `合成 ${i + 1}/${count}`, seed, temperature);
                 results.push(result);
                 
                 // 添加延迟避免请求过快
