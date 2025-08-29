@@ -278,37 +278,37 @@ export const generateFusedImages = async (
     try {
         const results: string[] = [];
         
-        // 根据变化强度定义不同的艺术变化描述
+        // 根据变化强度定义不同的摄影风格变化描述，保持照片真实性
         const variationSets = {
             subtle: [
-                "standard composition with natural lighting and balanced colors",
-                "slightly warmer color temperature with gentle shadows",
-                "marginally enhanced contrast with soft highlights",
-                "delicate color grading with subtle tone adjustments",
-                "refined lighting with gentle depth enhancement",
-                "minor composition tweaks with natural flow",
-                "soft focus variations with subtle detail enhancement",
-                "gentle color harmony with minimal stylistic changes"
+                "standard photographic composition with natural lighting and balanced colors, maintaining photographic realism",
+                "slightly warmer color temperature with gentle shadows, keeping natural photo appearance",
+                "marginally enhanced contrast with soft highlights, preserving realistic photo quality",
+                "delicate color grading with subtle tone adjustments, maintaining photographic authenticity",
+                "refined lighting with gentle depth enhancement, keeping natural photo characteristics",
+                "minor composition tweaks with natural flow, preserving realistic photographic style",
+                "soft focus variations with subtle detail enhancement, maintaining photo realism",
+                "gentle color harmony with minimal adjustments, keeping authentic photographic look"
             ],
             moderate: [
-                "standard composition with balanced lighting and natural colors",
-                "dynamic composition with enhanced lighting and improved contrast", 
-                "soft artistic style with warm color palette and gentle shadows",
-                "creative interpretation with vibrant colors and defined highlights",
-                "minimalist approach with refined tones and clean composition",
-                "cinematic perspective with enhanced depth of field and textures",
-                "artistic style with painterly effects and flowing composition",
-                "modern style with sharp details and contemporary color grading"
+                "standard photographic composition with balanced lighting and natural colors, maintaining photo realism",
+                "dynamic photographic composition with enhanced lighting and improved contrast, keeping realistic appearance", 
+                "warm photographic style with enhanced color palette and gentle shadows, preserving photo authenticity",
+                "creative photographic interpretation with vibrant colors and defined highlights, maintaining realism",
+                "clean photographic approach with refined tones and balanced composition, keeping natural photo quality",
+                "cinematic photographic perspective with enhanced depth of field and rich textures, preserving realism",
+                "professional photographic style with enhanced lighting and flowing composition, maintaining authenticity",
+                "modern photographic style with sharp details and contemporary color grading, keeping photo realism"
             ],
             dramatic: [
-                "bold cinematic composition with dramatic lighting and high contrast",
-                "avant-garde artistic interpretation with experimental color schemes",
-                "surreal creative approach with intense atmospheric effects", 
-                "hyper-stylized version with extreme color saturation and effects",
-                "theatrical composition with dramatic shadows and bold highlights",
-                "abstract artistic interpretation with unconventional perspectives",
-                "fantasy-inspired rendering with magical lighting and ethereal effects",
-                "cyberpunk-style interpretation with neon colors and futuristic atmosphere"
+                "bold photographic composition with dramatic lighting and high contrast, maintaining photographic realism",
+                "creative photographic interpretation with enhanced color schemes, preserving photo authenticity",
+                "atmospheric photographic approach with intense lighting effects, keeping realistic photo quality", 
+                "high-impact photographic version with enhanced color saturation, maintaining natural photo appearance",
+                "theatrical photographic composition with dramatic shadows and bold highlights, preserving realism",
+                "artistic photographic interpretation with unconventional angles, keeping authentic photo characteristics",
+                "moody photographic rendering with dramatic lighting and rich atmosphere, maintaining photo realism",
+                "striking photographic style with bold contrasts and dynamic composition, preserving photographic authenticity"
             ]
         };
         
