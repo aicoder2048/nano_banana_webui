@@ -6,7 +6,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
-import { generateEditedImage, generateFilteredImage, generateAdjustedImage, generateFusedImage, generateTexturedImage, removeBackgroundImage } from './services/geminiService';
+import { generateEditedImage, generateFilteredImage, generateAdjustedImage, generateFusedImage, generateFusedImages, generateTexturedImage, removeBackgroundImage } from './services/geminiService';
 import Header from './components/Header';
 import Spinner from './components/Spinner';
 import FilterPanel from './components/FilterPanel';
@@ -128,6 +128,9 @@ const EditorView: React.FC<{
   // Retouch state
   const [retouchPrompt, setRetouchPrompt] = useState('');
   const [retouchHotspot, setRetouchHotspot] = useState<{ x: number, y: number } | null>(null);
+  
+  // Fusion results state for multiple images
+  const [fusionResults, setFusionResults] = useState<string[]>([]);
 
   const currentImageFile = history[historyIndex];
   const originalImageFile = history[0];
@@ -291,9 +294,47 @@ const EditorView: React.FC<{
     runGenerativeTask(() => generateAdjustedImage(currentImageFile, prompt));
   };
   
-  const handleApplyFusion = (sourceImages: File[], prompt: string) => {
+  const handleApplyFusion = async (sourceImages: File[], prompt: string, count: number = 1) => {
     setLastAction({ type: 'fusion', prompt, sourceImages });
-    runGenerativeTask(() => generateFusedImage(currentImageFile, sourceImages, prompt));
+    setFusionResults([]); // 清空之前的结果
+    
+    if (count === 1) {
+      // 单张图片，使用原有逻辑
+      runGenerativeTask(() => generateFusedImage(currentImageFile, sourceImages, prompt));
+    } else {
+      // 多张图片，使用批量生成
+      setIsLoading(true);
+      setError(null);
+      try {
+        const results = await generateFusedImages(currentImageFile, sourceImages, prompt, count);
+        setFusionResults(results);
+        // 如果需要，可以将第一张设为当前图片
+        if (results.length > 0) {
+          const firstResult = await fetch(results[0]).then(r => r.blob());
+          const file = new File([firstResult], 'fusion-result.png', { type: 'image/png' });
+          updateHistory(file);
+        }
+      } catch (e) {
+        console.error("Failed to generate fusion images", e);
+        setError(e instanceof Error ? e.message : '生成合成图片时出错');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+  
+  // 处理应用单个合成结果到主画布
+  const handleApplyFusionResult = async (imageUrl: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'fusion-applied.png', { type: 'image/png' });
+      updateHistory(file);
+      setFusionResults([]); // 清空结果
+    } catch (e) {
+      console.error("Failed to apply fusion result", e);
+      setError('应用合成结果时出错');
+    }
   };
 
   const handleApplyTexture = (prompt: string) => {
@@ -573,7 +614,15 @@ const EditorView: React.FC<{
                   isCropping={!!completedCrop?.width && !!completedCrop?.height}
                 />
               )}
-              {activeTab === 'fusion' && <FusionPanel onApplyFusion={handleApplyFusion} isLoading={isLoading} onError={setError} />}
+              {activeTab === 'fusion' && (
+                <FusionPanel 
+                  onApplyFusion={handleApplyFusion} 
+                  isLoading={isLoading} 
+                  onError={setError}
+                  fusionResults={fusionResults}
+                  onApplyResult={handleApplyFusionResult}
+                />
+              )}
             </div>
           </div>
         </div>

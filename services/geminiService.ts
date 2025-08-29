@@ -150,16 +150,20 @@ const fileToGenerativePart = async (file: File) => {
     };
 };
 
-const callImageEditingModel = async (parts: any[], action: string): Promise<string> => {
+const callImageEditingModel = async (parts: any[], action: string, seed?: number, temperature?: number): Promise<string> => {
     try {
         const ai = getGoogleAI();
-        const response: GenerateContentResponse = await ai.models.generateContent({
+        
+        // 构建请求配置 - 简化配置，避免不支持的参数
+        const requestConfig: any = {
             model: 'gemini-2.5-flash-image-preview',
             contents: { parts: parts },
             config: {
                 responseModalities: [Modality.IMAGE, Modality.TEXT],
-            },
-        });
+            }
+        };
+        
+        const response: GenerateContentResponse = await ai.models.generateContent(requestConfig);
 
         for (const part of response.candidates[0].content.parts) {
             if (part.inlineData) {
@@ -256,6 +260,78 @@ export const generateFusedImage = async (mainImage: File, sourceImages: File[], 
 
     } catch (e) {
        throw handleApiError(e, '合成');
+    }
+};
+
+// 批量生成合成图片
+export const generateFusedImages = async (
+    mainImage: File, 
+    sourceImages: File[], 
+    prompt: string, 
+    count: number = 1
+): Promise<string[]> => {
+    try {
+        const results: string[] = [];
+        
+        // 定义简单的变化修饰词
+        const variations = [
+            "version 1 with standard rendering",
+            "version 2 with slightly different composition", 
+            "version 3 with alternative approach",
+            "version 4 with creative interpretation",
+            "version 5 with subtle variations",
+            "version 6 with different perspective",
+            "version 7 with unique style",
+            "version 8 with artistic touch"
+        ];
+        
+        // 预先准备图片数据，避免重复处理
+        const mainImagePart = await fileToGenerativePart(mainImage);
+        const sourceImageParts = await Promise.all(
+            sourceImages.map((file, index) => fileToGenerativePart(file).then(part => ({ ...part, index: index + 1 })))
+        );
+        
+        // 顺序生成每张图片
+        for (let i = 0; i < count; i++) {
+            try {
+                // 构建 prompt
+                let fullPrompt = `Fuse the images. The main image is the one I'm editing. `;
+
+                sourceImageParts.forEach(part => {
+                    fullPrompt += `Source image ${part.index} is provided. `;
+                });
+                
+                // 添加用户指令和变化描述
+                fullPrompt += `Instructions: ${prompt}. Create ${variations[i % variations.length]}.`;
+                
+                const textPart = { text: fullPrompt };
+                const allParts = [mainImagePart, ...sourceImageParts.map(p => ({ inlineData: p.inlineData })), textPart];
+                
+                const result = await callImageEditingModel(allParts, `合成 ${i + 1}/${count}`);
+                results.push(result);
+                
+                // 添加延迟避免请求过快
+                if (i < count - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5秒延迟
+                }
+            } catch (error) {
+                console.error(`Failed to generate fusion image ${i + 1}:`, error);
+                // 如果是第一张就失败，抛出错误
+                if (i === 0 && results.length === 0) {
+                    throw error;
+                }
+                // 否则继续生成其他图片
+            }
+        }
+        
+        if (results.length === 0) {
+            throw new Error('所有图片生成都失败了');
+        }
+        
+        return results;
+
+    } catch (e) {
+       throw handleApiError(e, '批量合成');
     }
 };
 
