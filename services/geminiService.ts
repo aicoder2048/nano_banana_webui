@@ -166,14 +166,46 @@ const callImageEditingModel = async (parts: any[], action: string, seed?: number
                 ...(seed !== undefined && { seed: seed })
             }
         };
+
+        // 调试日志：检查参数是否正确传递
+        console.log(`API Request for ${action}:`, {
+            temperature: requestConfig.config.temperature,
+            seed: requestConfig.config.seed,
+            model: requestConfig.model
+        });
         
         const response: GenerateContentResponse = await ai.models.generateContent(requestConfig);
+
+        // 调试日志：检查响应结构
+        console.log(`API Response structure for ${action}:`, {
+            hasCandidates: !!response.candidates,
+            candidatesLength: response.candidates?.length,
+            firstCandidate: response.candidates?.[0] ? {
+                hasContent: !!response.candidates[0].content,
+                hasParts: !!response.candidates[0].content?.parts,
+                partsLength: response.candidates[0].content?.parts?.length
+            } : null
+        });
+
+        // 安全检查响应结构
+        if (!response.candidates || !response.candidates[0]) {
+            throw new Error('API 响应中没有候选结果');
+        }
+
+        if (!response.candidates[0].content) {
+            throw new Error('API 响应中没有内容');
+        }
+
+        if (!response.candidates[0].content.parts || !Array.isArray(response.candidates[0].content.parts)) {
+            throw new Error('API 响应格式不正确：缺少 parts 数组');
+        }
 
         for (const part of response.candidates[0].content.parts) {
             if (part.inlineData) {
                 return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
             }
         }
+        
         // This is a special case for prompt-blocking or other non-image responses
         if (response.candidates[0].content.parts[0]?.text) {
              throw new Error("Model responded with text instead of an image. The prompt may have been blocked.");
@@ -291,24 +323,24 @@ export const generateFusedImages = async (
                 "gentle color harmony with minimal adjustments, keeping authentic photographic look"
             ],
             moderate: [
-                "standard photographic composition with balanced lighting and natural colors, maintaining photo realism",
-                "dynamic photographic composition with enhanced lighting and improved contrast, keeping realistic appearance", 
-                "warm photographic style with enhanced color palette and gentle shadows, preserving photo authenticity",
-                "creative photographic interpretation with vibrant colors and defined highlights, maintaining realism",
-                "clean photographic approach with refined tones and balanced composition, keeping natural photo quality",
-                "cinematic photographic perspective with enhanced depth of field and rich textures, preserving realism",
-                "professional photographic style with enhanced lighting and flowing composition, maintaining authenticity",
-                "modern photographic style with sharp details and contemporary color grading, keeping photo realism"
+                "natural photographic style with balanced lighting and authentic colors, maintaining realistic photo quality",
+                "warm golden hour photographic lighting with soft shadows and enhanced warmth, preserving photo realism", 
+                "cool blue hour photographic tone with crisp highlights and deeper shadows, keeping authentic appearance",
+                "high contrast black and white photographic style converted back to realistic color, maintaining natural look",
+                "vintage film photographic aesthetic with slight grain and rich color depth, preserving photo authenticity",
+                "portrait photography style with shallow depth of field and natural bokeh, keeping realistic quality",
+                "landscape photography approach with enhanced natural colors and dynamic range, maintaining photo realism",
+                "street photography style with candid composition and natural lighting, preserving authentic appearance"
             ],
             dramatic: [
-                "bold photographic composition with dramatic lighting and high contrast, maintaining photographic realism",
-                "creative photographic interpretation with enhanced color schemes, preserving photo authenticity",
-                "atmospheric photographic approach with intense lighting effects, keeping realistic photo quality", 
-                "high-impact photographic version with enhanced color saturation, maintaining natural photo appearance",
-                "theatrical photographic composition with dramatic shadows and bold highlights, preserving realism",
-                "artistic photographic interpretation with unconventional angles, keeping authentic photo characteristics",
-                "moody photographic rendering with dramatic lighting and rich atmosphere, maintaining photo realism",
-                "striking photographic style with bold contrasts and dynamic composition, preserving photographic authenticity"
+                "dramatic studio lighting with strong directional light and deep shadows, maintaining photographic realism",
+                "noir photography style with high contrast and moody atmosphere, preserving photo authenticity",
+                "backlit photographic composition with rim lighting and atmospheric glow, keeping realistic photo quality", 
+                "architectural photography approach with bold geometric composition, maintaining natural photo appearance",
+                "fashion photography style with dramatic poses and professional lighting, preserving authentic realism",
+                "documentary photography with raw emotional intensity and natural drama, keeping photo characteristics",
+                "cinematic photography with film-like color grading and dramatic depth, maintaining photographic quality",
+                "urban photography style with strong contrasts and dynamic street lighting, preserving realistic appearance"
             ]
         };
         
