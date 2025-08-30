@@ -350,13 +350,13 @@ export const generateFusedImages = async (
                 "close-up portrait photography focusing on face and shoulders only, with shallow depth of field and natural lighting", 
                 "elegant standing pose with one hand on hip and confident posture against neutral background",
                 "side profile view photography showing elegant silhouette from 90-degree angle with dramatic lighting",
-                "casual sitting pose photograph in comfortable chair or natural setting with relaxed body language",
+                "single person walking pose captured in mid-step with natural stride and balanced movement",
                 "back view or over-shoulder perspective showing person looking away or turning head back toward camera",
                 "medium shot composition from waist up with arms and upper body clearly visible in frame",
                 "overhead angle photography shot from above looking down at subject with unique bird's-eye perspective",
                 "three-quarter angle portrait showing face and body from 45-degree angle with natural lighting",
                 "full-body portrait with arms crossed pose showing confidence and strength in composition",
-                "seated on ground or floor pose with legs extended and relaxed casual positioning",
+                "elegant kneeling pose on one knee with upright posture and graceful positioning",
                 "standing against wall or architectural element with one shoulder leaning for support"
             ],
             dramatic: [
