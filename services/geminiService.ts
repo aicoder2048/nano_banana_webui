@@ -348,22 +348,30 @@ export const generateFusedImages = async (
             moderate: [
                 "natural outdoor full-body portrait in park or garden setting with trees and greenery background, maintaining photographic realism",
                 "close-up portrait photography focusing on face and shoulders only, with shallow depth of field and natural lighting", 
-                "dynamic jumping or dancing action shot captured mid-movement with authentic body motion and energy",
+                "elegant standing pose with one hand on hip and confident posture against neutral background",
                 "side profile view photography showing elegant silhouette from 90-degree angle with dramatic lighting",
                 "casual sitting pose photograph in comfortable chair or natural setting with relaxed body language",
                 "back view or over-shoulder perspective showing person looking away or turning head back toward camera",
                 "medium shot composition from waist up with arms and upper body clearly visible in frame",
-                "overhead angle photography shot from above looking down at subject with unique bird's-eye perspective"
+                "overhead angle photography shot from above looking down at subject with unique bird's-eye perspective",
+                "three-quarter angle portrait showing face and body from 45-degree angle with natural lighting",
+                "full-body portrait with arms crossed pose showing confidence and strength in composition",
+                "seated on ground or floor pose with legs extended and relaxed casual positioning",
+                "standing against wall or architectural element with one shoulder leaning for support"
             ],
             dramatic: [
                 "dramatic low-angle shot looking up at subject from below with powerful perspective and strong lighting contrast",
                 "artistic black and white portrait with high contrast lighting and emotional facial expression in monochrome style",
-                "athletic action photography capturing intense workout or sports movement with dynamic body positioning", 
+                "fashion model pose with one leg slightly forward and hands positioned elegantly at sides", 
                 "fashion editorial with bold geometric poses and dramatic hand gestures against minimalist background",
                 "intimate close-up beauty shot focusing on eyes and facial features with soft romantic lighting",
                 "urban street photography style with natural city environment and candid documentary approach",
                 "artistic lying down pose photographed from interesting angle with creative composition and depth",
-                "dramatic backlighting silhouette with rim lighting effect creating striking outline against bright background"
+                "dramatic backlighting silhouette with rim lighting effect creating striking outline against bright background",
+                "high-contrast studio portrait with dramatic shadow patterns across face and body",
+                "elegant full-body pose with flowing fabric or clothing creating dynamic visual interest",
+                "moody atmospheric portrait with dramatic chiaroscuro lighting technique and deep shadows",
+                "architectural portrait using building elements or columns to frame the subject creatively"
             ]
         };
         
