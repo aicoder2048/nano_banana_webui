@@ -113,7 +113,7 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-400">生成数量：</span>
           <div className="flex gap-2">
-            {[1, 2, 4, 8, 12].map(count => (
+            {[1, 2, 4, 8, 12, 24, 48, 96, 128].map(count => (
               <button
                 key={count}
                 onClick={() => {
@@ -203,8 +203,11 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
           <div className={`grid gap-3 ${
             fusionResults.length === 1 ? 'grid-cols-1' : 
             fusionResults.length === 2 ? 'grid-cols-2' : 
-            fusionResults.length <= 8 ? 'grid-cols-2 md:grid-cols-4' :
-            'grid-cols-3 md:grid-cols-4'
+            fusionResults.length <= 4 ? 'grid-cols-2 md:grid-cols-2' :
+            fusionResults.length <= 12 ? 'grid-cols-2 md:grid-cols-4' :
+            fusionResults.length <= 24 ? 'grid-cols-3 md:grid-cols-6' :
+            fusionResults.length <= 48 ? 'grid-cols-4 md:grid-cols-8' :
+            'grid-cols-5 md:grid-cols-10'
           }`}>
             {fusionResults.map((result, index) => (
               <div key={index} className="relative group">
