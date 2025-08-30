@@ -243,17 +243,356 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
                   </button>
                   <button
                     onClick={() => {
-                      if (result.startsWith('data:')) {
-                        fetch(result)
-                          .then(res => res.blob())
-                          .then(blob => {
-                            const blobUrl = URL.createObjectURL(blob);
-                            window.open(blobUrl, '_blank');
-                            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-                          });
-                      } else {
-                        window.open(result, '_blank');
-                      }
+                      // 创建包含所有图片和功能的HTML页面
+                      const htmlContent = `
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片查看器</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: black;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      background: rgba(0,0,0,0.8);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(8px);
+      z-index: 10;
+    }
+    .left-controls {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .image-counter {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .rating-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .rating-label {
+      color: #9ca3af;
+      font-size: 14px;
+    }
+    .rating-buttons {
+      display: flex;
+      gap: 4px;
+    }
+    .rating-btn {
+      background: #374151;
+      color: #d1d5db;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+    .rating-btn:hover {
+      background: #4b5563;
+    }
+    .rating-btn.active {
+      background: #eab308;
+      color: black;
+      font-weight: bold;
+    }
+    .save-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .save-btn:hover {
+      background: #1d4ed8;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 8px;
+    }
+    .close-btn:hover {
+      color: #d1d5db;
+    }
+    .main-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-btn {
+      position: absolute;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .nav-btn.prev {
+      left: 16px;
+    }
+    .nav-btn.next {
+      right: 16px;
+    }
+    .main-image {
+      max-width: 100%;
+      max-height: 100%;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .main-image.zoomed {
+      transform: scale(1.5);
+    }
+    .hint {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.6);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .indicators {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      background: rgba(0,0,0,0.8);
+    }
+    .indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #6b7280;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .indicator.active {
+      background: white;
+      width: 32px;
+      border-radius: 16px;
+    }
+    .indicator:hover {
+      background: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="left-controls">
+      <div class="image-counter">
+        <span id="current-num">1</span> / <span id="total-num">1</span>
+      </div>
+      
+      <div class="rating-section">
+        <span class="rating-label">评分：</span>
+        <div class="rating-buttons">
+          <button class="rating-btn active" onclick="setRating(5)" id="rating-5">5★</button>
+          <button class="rating-btn" onclick="setRating(4)" id="rating-4">4★</button>
+          <button class="rating-btn" onclick="setRating(3)" id="rating-3">3★</button>
+        </div>
+      </div>
+
+      <button class="save-btn" onclick="saveImage()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        保存
+      </button>
+    </div>
+
+    <button class="close-btn" onclick="window.close()">✕</button>
+  </div>
+
+  <div class="main-area">
+    <button class="nav-btn prev" id="prev-btn" onclick="prevImage()">
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+
+    <img id="main-image" class="main-image" onclick="toggleZoom()" alt="查看图片">
+
+    <button class="nav-btn next" id="next-btn" onclick="nextImage()">
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+
+    <div class="hint" id="hint">点击图片放大 | 使用 ← → 切换图片</div>
+  </div>
+
+  <div class="indicators" id="indicators"></div>
+
+  <script>
+    const images = ${JSON.stringify(fusionResults)};
+    let currentIndex = ${index};
+    let isZoomed = false;
+    let ratings = {};
+    
+    // 设置默认评分为5星
+    for (let i = 0; i < images.length; i++) {
+      ratings[i] = 5;
+    }
+
+    function updateDisplay() {
+      const img = document.getElementById('main-image');
+      img.src = images[currentIndex];
+      
+      document.getElementById('current-num').textContent = currentIndex + 1;
+      document.getElementById('total-num').textContent = images.length;
+      
+      // 更新导航按钮可见性
+      document.getElementById('prev-btn').style.display = currentIndex > 0 ? 'flex' : 'none';
+      document.getElementById('next-btn').style.display = currentIndex < images.length - 1 ? 'flex' : 'none';
+      
+      // 更新指示器
+      updateIndicators();
+      
+      // 更新评分显示
+      updateRatingDisplay();
+      
+      // 重置缩放
+      isZoomed = false;
+      img.className = 'main-image';
+      document.getElementById('hint').textContent = '点击图片放大 | 使用 ← → 切换图片';
+    }
+
+    function updateIndicators() {
+      const container = document.getElementById('indicators');
+      container.innerHTML = '';
+      
+      for (let i = 0; i < images.length; i++) {
+        const indicator = document.createElement('div');
+        indicator.className = 'indicator' + (i === currentIndex ? ' active' : '');
+        indicator.onclick = () => {
+          currentIndex = i;
+          updateDisplay();
+        };
+        container.appendChild(indicator);
+      }
+    }
+
+    function updateRatingDisplay() {
+      const currentRating = ratings[currentIndex];
+      [3, 4, 5].forEach(rating => {
+        const btn = document.getElementById('rating-' + rating);
+        btn.className = 'rating-btn' + (rating === currentRating ? ' active' : '');
+      });
+    }
+
+    function prevImage() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateDisplay();
+      }
+    }
+
+    function nextImage() {
+      if (currentIndex < images.length - 1) {
+        currentIndex++;
+        updateDisplay();
+      }
+    }
+
+    function toggleZoom() {
+      const img = document.getElementById('main-image');
+      isZoomed = !isZoomed;
+      img.className = 'main-image' + (isZoomed ? ' zoomed' : '');
+      document.getElementById('hint').textContent = isZoomed ? '点击图片缩小' : '点击图片放大 | 使用 ← → 切换图片';
+    }
+
+    function setRating(rating) {
+      ratings[currentIndex] = rating;
+      updateRatingDisplay();
+    }
+
+    function saveImage() {
+      const link = document.createElement('a');
+      link.href = images[currentIndex];
+      
+      const now = new Date();
+      const timestamp = [
+        String(now.getFullYear()).slice(-2).padStart(2, '0'),
+        String(now.getMonth() + 1).padStart(2, '0'),
+        String(now.getDate()).padStart(2, '0')
+      ].join('') + '-' + [
+        String(now.getHours()).padStart(2, '0'),
+        String(now.getMinutes()).padStart(2, '0'),
+        String(now.getSeconds()).padStart(2, '0')
+      ].join('');
+      
+      const rating = ratings[currentIndex];
+      const ratingSuffix = '_' + rating + '-Stars';
+      link.download = 'fusion_' + (currentIndex + 1) + '_' + timestamp + ratingSuffix + '.jpg';
+      link.click();
+    }
+
+    // 键盘快捷键
+    document.addEventListener('keydown', function(e) {
+      switch(e.key) {
+        case 'ArrowLeft':
+          prevImage();
+          break;
+        case 'ArrowRight':
+          nextImage();
+          break;
+        case ' ':
+          e.preventDefault();
+          toggleZoom();
+          break;
+        case 'Escape':
+          window.close();
+          break;
+      }
+    });
+
+    // 初始化
+    updateDisplay();
+  </script>
+</body>
+</html>`;
+                      
+                      const blob = new Blob([htmlContent], { type: 'text/html' });
+                      const url = URL.createObjectURL(blob);
+                      window.open(url, '_blank');
+                      setTimeout(() => URL.revokeObjectURL(url), 1000);
                     }}
                     className="px-3 py-1 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
                   >
