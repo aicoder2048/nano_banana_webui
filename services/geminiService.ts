@@ -305,7 +305,8 @@ export const generateFusedImages = async (
     sourceImages: File[], 
     prompt: string, 
     count: number = 1,
-    variationIntensity: string = 'moderate'
+    variationIntensity: string = 'moderate',
+    onProgress?: (imageUrl: string, current: number, total: number) => void
 ): Promise<string[]> => {
     try {
         const results: string[] = [];
@@ -392,6 +393,11 @@ export const generateFusedImages = async (
                 
                 const result = await callImageEditingModel(allParts, `合成 ${i + 1}/${count}`, seed, temperature);
                 results.push(result);
+                
+                // 调用进度回调，通知UI有新图片生成
+                if (onProgress) {
+                    onProgress(result, i + 1, count);
+                }
                 
                 // 添加延迟避免请求过快
                 if (i < count - 1) {

@@ -131,6 +131,9 @@ const EditorView: React.FC<{
   
   // Fusion results state for multiple images
   const [fusionResults, setFusionResults] = useState<string[]>([]);
+  
+  // 添加进度状态管理
+  const [fusionProgress, setFusionProgress] = useState<{ current: number; total: number } | null>(null);
 
   const currentImageFile = history[historyIndex];
   const originalImageFile = history[0];
@@ -297,17 +300,31 @@ const EditorView: React.FC<{
   const handleApplyFusion = async (sourceImages: File[], prompt: string, count: number = 1, variationIntensity?: string) => {
     setLastAction({ type: 'fusion', prompt, sourceImages });
     setFusionResults([]); // 清空之前的结果
+    setFusionProgress(null); // 清空进度状态
     
     if (count === 1) {
       // 单张图片，使用原有逻辑
       runGenerativeTask(() => generateFusedImage(currentImageFile, sourceImages, prompt));
     } else {
-      // 多张图片，使用批量生成
+      // 多张图片，使用流式生成
       setIsLoading(true);
       setError(null);
+      setFusionProgress({ current: 0, total: count }); // 设置初始进度
+      
       try {
-        const results = await generateFusedImages(currentImageFile, sourceImages, prompt, count, variationIntensity);
-        setFusionResults(results);
+        const results = await generateFusedImages(
+          currentImageFile, 
+          sourceImages, 
+          prompt, 
+          count, 
+          variationIntensity,
+          (imageUrl, current, total) => {
+            // 每生成一张图片就立即添加到结果中
+            setFusionResults(prev => [...prev, imageUrl]);
+            setFusionProgress({ current, total });
+          }
+        );
+        
         // 如果需要，可以将第一张设为当前图片
         if (results.length > 0) {
           const firstResult = await fetch(results[0]).then(r => r.blob());
@@ -319,6 +336,7 @@ const EditorView: React.FC<{
         setError(e instanceof Error ? e.message : '生成合成图片时出错');
       } finally {
         setIsLoading(false);
+        setFusionProgress(null); // 清空进度状态
       }
     }
   };
@@ -621,6 +639,7 @@ const EditorView: React.FC<{
                   onError={setError}
                   fusionResults={fusionResults}
                   onApplyResult={handleApplyFusionResult}
+                  fusionProgress={fusionProgress}
                 />
               )}
             </div>

@@ -12,12 +12,13 @@ interface FusionPanelProps {
   onError: (message: string) => void;
   fusionResults?: string[];
   onApplyResult?: (imageUrl: string) => void;
+  fusionProgress?: { current: number; total: number } | null;
 }
 
 const MAX_FILE_SIZE_MB = 15;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onError, fusionResults, onApplyResult }) => {
+const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onError, fusionResults, onApplyResult, fusionProgress }) => {
   const [sourceImageFile1, setSourceImageFile1] = useState<File | null>(null);
   const [sourceImageFile2, setSourceImageFile2] = useState<File | null>(null);
   const [prompt, setPrompt] = useState('');
@@ -187,7 +188,11 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
           className="bg-gradient-to-br from-purple-600 to-purple-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-base disabled:from-purple-800 disabled:to-purple-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
           disabled={isLoading || !prompt.trim() || (!sourceImageFile1 && !sourceImageFile2)}
         >
-          {isLoading ? `生成中... (${imageCount}张)` : `合成`}
+          {isLoading ? (
+            fusionProgress 
+              ? `生成中... ${fusionProgress.current}/${fusionProgress.total}` 
+              : `生成中... (${imageCount}张)`
+          ) : `合成`}
         </button>
       </div>
 
