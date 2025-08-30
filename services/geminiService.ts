@@ -346,24 +346,24 @@ export const generateFusedImages = async (
                 "gentle color harmony with minimal adjustments, keeping authentic photographic look"
             ],
             moderate: [
-                "natural photographic style with balanced lighting and authentic colors, maintaining realistic photo quality",
-                "warm golden hour photographic lighting with soft shadows and enhanced warmth, preserving photo realism", 
-                "cool blue hour photographic tone with crisp highlights and deeper shadows, keeping authentic appearance",
-                "high contrast black and white photographic style converted back to realistic color, maintaining natural look",
-                "vintage film photographic aesthetic with slight grain and rich color depth, preserving photo authenticity",
-                "portrait photography style with shallow depth of field and natural bokeh, keeping realistic quality",
-                "landscape photography approach with enhanced natural colors and dynamic range, maintaining photo realism",
-                "street photography style with candid composition and natural lighting, preserving authentic appearance"
+                "environmental portrait with natural outdoor setting and soft ambient lighting, maintaining photographic realism",
+                "studio fashion photography with professional lighting setup and clean background, preserving photo authenticity", 
+                "artistic close-up composition with creative framing and depth of field, keeping realistic photo quality",
+                "dynamic action pose with natural movement and authentic body language, maintaining photo realism",
+                "atmospheric mood photography with environmental elements and natural textures, preserving authentic appearance",
+                "editorial style photography with sophisticated composition and professional lighting, keeping photo quality",
+                "lifestyle photography approach with natural interaction and candid expression, maintaining realistic look",
+                "creative angle photography with unique perspective while preserving natural proportions and lighting"
             ],
             dramatic: [
-                "dramatic studio lighting with strong directional light and deep shadows, maintaining photographic realism",
-                "noir photography style with high contrast and moody atmosphere, preserving photo authenticity",
-                "backlit photographic composition with rim lighting and atmospheric glow, keeping realistic photo quality", 
-                "architectural photography approach with bold geometric composition, maintaining natural photo appearance",
-                "fashion photography style with dramatic poses and professional lighting, preserving authentic realism",
-                "documentary photography with raw emotional intensity and natural drama, keeping photo characteristics",
-                "cinematic photography with film-like color grading and dramatic depth, maintaining photographic quality",
-                "urban photography style with strong contrasts and dynamic street lighting, preserving realistic appearance"
+                "high-fashion editorial photography with bold artistic vision and professional studio setup, maintaining photo realism",
+                "dramatic environmental portrait with striking natural backdrop and dynamic lighting, preserving authenticity",
+                "creative conceptual photography with artistic interpretation while keeping realistic human proportions", 
+                "powerful athletic photography capturing peak action and natural muscle definition, maintaining photo quality",
+                "expressive artistic portrait with emotional depth and authentic facial expressions, preserving realism",
+                "avant-garde fashion photography with innovative styling and authentic textures, keeping photo characteristics",
+                "dramatic beauty photography with sophisticated lighting and natural skin tones, maintaining photographic quality",
+                "artistic silhouette photography with creative lighting while preserving realistic body shapes and proportions"
             ]
         };
         
