@@ -112,7 +112,7 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-400">生成数量：</span>
           <div className="flex gap-2">
-            {[1, 2, 4, 8].map(count => (
+            {[1, 2, 4, 8, 12].map(count => (
               <button
                 key={count}
                 onClick={() => {
@@ -187,7 +187,7 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
           className="bg-gradient-to-br from-purple-600 to-purple-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-base disabled:from-purple-800 disabled:to-purple-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
           disabled={isLoading || !prompt.trim() || (!sourceImageFile1 && !sourceImageFile2)}
         >
-          {isLoading ? `生成中... (${imageCount}张)` : `应用合成`}
+          {isLoading ? `生成中... (${imageCount}张)` : `合成`}
         </button>
       </div>
 
@@ -198,7 +198,8 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
           <div className={`grid gap-3 ${
             fusionResults.length === 1 ? 'grid-cols-1' : 
             fusionResults.length === 2 ? 'grid-cols-2' : 
-            'grid-cols-2 md:grid-cols-4'
+            fusionResults.length <= 8 ? 'grid-cols-2 md:grid-cols-4' :
+            'grid-cols-3 md:grid-cols-4'
           }`}>
             {fusionResults.map((result, index) => (
               <div key={index} className="relative group">

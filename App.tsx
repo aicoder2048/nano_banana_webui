@@ -91,7 +91,7 @@ const tabNames: Record<Tab, string> = {
   retouch: '修饰',
 };
 
-const TABS: Tab[] = ['adjust', 'filters', 'texture', 'erase', 'crop', 'fusion', 'retouch'];
+const TABS: Tab[] = ['fusion', 'adjust', 'filters', 'texture', 'erase', 'crop', 'retouch'];
 
 type LastAction = 
   | { type: 'retouch', prompt: string, hotspot: { x: number, y: number } }
@@ -111,7 +111,7 @@ const EditorView: React.FC<{
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>('adjust');
+  const [activeTab, setActiveTab] = useState<Tab>('fusion');
   const [isComparing, setIsComparing] = useState(false);
   const [lastAction, setLastAction] = useState<LastAction | null>(null);
 
@@ -183,7 +183,7 @@ const EditorView: React.FC<{
       }
       setHistory([file]);
       setHistoryIndex(0);
-      setActiveTab('adjust');
+      setActiveTab('fusion');
       setError(null);
       setLastAction(null);
       onFileSelect(files);
@@ -196,7 +196,7 @@ const EditorView: React.FC<{
         const newFile = dataURLtoFile(dataUrl, `generated-${Date.now()}.png`);
         setHistory([newFile]);
         setHistoryIndex(0);
-        setActiveTab('adjust'); // or another default
+        setActiveTab('fusion'); // or another default
         setError(null);
         setLastAction(null);
         onImageGenerated(dataUrl);
