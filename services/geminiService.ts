@@ -346,24 +346,24 @@ export const generateFusedImages = async (
                 "gentle color harmony with minimal adjustments, keeping authentic photographic look"
             ],
             moderate: [
-                "environmental portrait with natural outdoor setting and soft ambient lighting, maintaining photographic realism",
-                "studio fashion photography with professional lighting setup and clean background, preserving photo authenticity", 
-                "artistic close-up composition with creative framing and depth of field, keeping realistic photo quality",
-                "dynamic action pose with natural movement and authentic body language, maintaining photo realism",
-                "atmospheric mood photography with environmental elements and natural textures, preserving authentic appearance",
-                "editorial style photography with sophisticated composition and professional lighting, keeping photo quality",
-                "lifestyle photography approach with natural interaction and candid expression, maintaining realistic look",
-                "creative angle photography with unique perspective while preserving natural proportions and lighting"
+                "natural outdoor full-body portrait in park or garden setting with trees and greenery background, maintaining photographic realism",
+                "close-up portrait photography focusing on face and shoulders only, with shallow depth of field and natural lighting", 
+                "dynamic jumping or dancing action shot captured mid-movement with authentic body motion and energy",
+                "side profile view photography showing elegant silhouette from 90-degree angle with dramatic lighting",
+                "casual sitting pose photograph in comfortable chair or natural setting with relaxed body language",
+                "back view or over-shoulder perspective showing person looking away or turning head back toward camera",
+                "medium shot composition from waist up with arms and upper body clearly visible in frame",
+                "overhead angle photography shot from above looking down at subject with unique bird's-eye perspective"
             ],
             dramatic: [
-                "high-fashion editorial photography with bold artistic vision and professional studio setup, maintaining photo realism",
-                "dramatic environmental portrait with striking natural backdrop and dynamic lighting, preserving authenticity",
-                "creative conceptual photography with artistic interpretation while keeping realistic human proportions", 
-                "powerful athletic photography capturing peak action and natural muscle definition, maintaining photo quality",
-                "expressive artistic portrait with emotional depth and authentic facial expressions, preserving realism",
-                "avant-garde fashion photography with innovative styling and authentic textures, keeping photo characteristics",
-                "dramatic beauty photography with sophisticated lighting and natural skin tones, maintaining photographic quality",
-                "artistic silhouette photography with creative lighting while preserving realistic body shapes and proportions"
+                "dramatic low-angle shot looking up at subject from below with powerful perspective and strong lighting contrast",
+                "artistic black and white portrait with high contrast lighting and emotional facial expression in monochrome style",
+                "athletic action photography capturing intense workout or sports movement with dynamic body positioning", 
+                "fashion editorial with bold geometric poses and dramatic hand gestures against minimalist background",
+                "intimate close-up beauty shot focusing on eyes and facial features with soft romantic lighting",
+                "urban street photography style with natural city environment and candid documentary approach",
+                "artistic lying down pose photographed from interesting angle with creative composition and depth",
+                "dramatic backlighting silhouette with rim lighting effect creating striking outline against bright background"
             ]
         };
         
