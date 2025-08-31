@@ -421,41 +421,8 @@ export const generateFusedImages = async (
                 
                 const temperature = baseTemp + (i * tempRange / Math.max(count - 1, 1));
                 
-                // 添加重试机制，最多重试2次
-                let result: string | null = null;
-                let lastError: any = null;
-                const maxRetries = 2;
-                
-                for (let retry = 0; retry <= maxRetries; retry++) {
-                    try {
-                        result = await callImageEditingModel(allParts, `合成 ${i + 1}/${count}${retry > 0 ? ` (重试 ${retry})` : ''}`, seed, temperature);
-                        break; // 成功生成，跳出重试循环
-                    } catch (error: any) {
-                        lastError = error;
-                        console.warn(`Generate attempt ${retry + 1} failed for image ${i + 1}:`, error.message);
-                        
-                        // 如果不是最后一次重试，等待后重试
-                        if (retry < maxRetries) {
-                            // 检查错误类型，对于可重试的错误进行重试
-                            const errorMessage = error.message || '';
-                            if (errorMessage.includes('API 响应中没有内容') || 
-                                errorMessage.includes('网络问题') || 
-                                errorMessage.includes('可能需要重试')) {
-                                console.log(`Will retry in ${(retry + 1) * 2} seconds...`);
-                                await new Promise(resolve => setTimeout(resolve, (retry + 1) * 2000)); // 递增延迟
-                                continue;
-                            } else {
-                                // 不可重试的错误（如安全过滤），直接抛出
-                                throw error;
-                            }
-                        }
-                    }
-                }
-                
-                if (!result) {
-                    throw lastError || new Error(`生成第 ${i + 1} 张图片失败（已重试 ${maxRetries} 次）`);
-                }
-                
+                // 直接调用，不重试以节省时间
+                const result = await callImageEditingModel(allParts, `合成 ${i + 1}/${count}`, seed, temperature);
                 results.push(result);
                 
                 // 调用进度回调，通知UI有新图片生成
