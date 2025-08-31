@@ -6,7 +6,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
-import { generateEditedImage, generateFilteredImage, generateAdjustedImage, generateFusedImage, generateFusedImages, generateTexturedImage, removeBackgroundImage } from './services/geminiService';
+import { generateEditedImage, generateFilteredImage, generateAdjustedImage, generateAdjustedImages, generateFusedImage, generateFusedImages, generateTexturedImage, removeBackgroundImage } from './services/geminiService';
 import Header from './components/Header';
 import Spinner from './components/Spinner';
 import FilterPanel from './components/FilterPanel';
@@ -95,9 +95,9 @@ const TABS: Tab[] = ['fusion', 'adjust', 'filters', 'texture', 'erase', 'crop', 
 
 type LastAction = 
   | { type: 'retouch', prompt: string, hotspot: { x: number, y: number } }
-  | { type: 'adjust', prompt: string }
+  | { type: 'adjust', prompt: string, count?: number, variationIntensity?: string }
   | { type: 'filters', prompt: string }
-  | { type: 'fusion', prompt: string, sourceImages: File[] }
+  | { type: 'fusion', prompt: string, sourceImages: File[], count?: number, variationIntensity?: string }
   | { type: 'texture', prompt: string }
   | { type: 'erase' };
 
@@ -134,6 +134,10 @@ const EditorView: React.FC<{
   
   // 添加进度状态管理
   const [fusionProgress, setFusionProgress] = useState<{ current: number; total: number } | null>(null);
+  
+  // Adjustment results state for multiple images
+  const [adjustmentResults, setAdjustmentResults] = useState<string[]>([]);
+  const [adjustmentProgress, setAdjustmentProgress] = useState<{ current: number; total: number } | null>(null);
 
   const currentImageFile = history[historyIndex];
   const originalImageFile = history[0];
@@ -292,9 +296,48 @@ const EditorView: React.FC<{
     runGenerativeTask(() => generateFilteredImage(currentImageFile, prompt));
   };
   
-  const handleApplyAdjustment = (prompt: string) => {
-    setLastAction({ type: 'adjust', prompt });
-    runGenerativeTask(() => generateAdjustedImage(currentImageFile, prompt));
+  const handleApplyAdjustment = async (prompt: string, count: number = 1, variationIntensity?: string) => {
+    setLastAction({ type: 'adjust', prompt, count, variationIntensity });
+    setAdjustmentResults([]); // 清空之前的结果
+    setAdjustmentProgress(null); // 清空进度状态
+    
+    if (count === 1) {
+      // 单张图片，使用原有逻辑
+      runGenerativeTask(() => generateAdjustedImage(currentImageFile, prompt));
+    } else {
+      // 多张图片，使用流式生成
+      setIsLoading(true);
+      setError(null);
+      setAdjustmentProgress({ current: 0, total: count }); // 设置初始进度
+      
+      try {
+        const results = await generateAdjustedImages(
+          currentImageFile,
+          prompt,
+          count,
+          variationIntensity || 'moderate',
+          (imageUrl: string, current: number, total: number) => {
+            // 进度回调：每生成一张图片就添加到结果中
+            setAdjustmentResults(prev => {
+              const newResults = [...prev, imageUrl];
+              return newResults;
+            });
+            setAdjustmentProgress({ current, total });
+          }
+        );
+        
+        // 确保所有结果都被设置
+        setAdjustmentResults(results);
+        setAdjustmentProgress({ current: count, total: count });
+      } catch (error: any) {
+        console.error('批量调整失败:', error);
+        setError(error.message || '调整过程中发生错误');
+      } finally {
+        setIsLoading(false);
+        // 几秒后清除进度状态
+        setTimeout(() => setAdjustmentProgress(null), 3000);
+      }
+    }
   };
   
   const handleApplyFusion = async (sourceImages: File[], prompt: string, count: number = 1, variationIntensity?: string) => {
@@ -352,6 +395,20 @@ const EditorView: React.FC<{
     } catch (e) {
       console.error("Failed to apply fusion result", e);
       setError('应用合成结果时出错');
+    }
+  };
+  
+  // 处理应用单个调整结果到主画布
+  const handleApplyAdjustmentResult = async (imageUrl: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'adjustment-applied.png', { type: 'image/png' });
+      updateHistory(file);
+      setAdjustmentResults([]); // 清空结果
+    } catch (e) {
+      console.error("Failed to apply adjustment result", e);
+      setError('应用调整结果时出错');
     }
   };
 
@@ -419,7 +476,14 @@ const EditorView: React.FC<{
         task = () => generateEditedImage(imageToEdit, lastAction.prompt, lastAction.hotspot);
         break;
       case 'adjust':
-        task = () => generateAdjustedImage(imageToEdit, lastAction.prompt);
+        if (lastAction.count && lastAction.count > 1) {
+          // 多图调整，使用异步处理
+          handleApplyAdjustment(lastAction.prompt, lastAction.count, lastAction.variationIntensity);
+          return;
+        } else {
+          // 单图调整
+          task = () => generateAdjustedImage(imageToEdit, lastAction.prompt);
+        }
         break;
       case 'filters':
         task = () => generateFilteredImage(imageToEdit, lastAction.prompt);
@@ -648,7 +712,7 @@ const EditorView: React.FC<{
                       </div>
                   </div>
               )}
-              {activeTab === 'adjust' && <AdjustmentPanel onApplyAdjustment={handleApplyAdjustment} isLoading={isLoading} currentImage={currentImageFile} onError={setError} />}
+              {activeTab === 'adjust' && <AdjustmentPanel onApplyAdjustment={handleApplyAdjustment} isLoading={isLoading} currentImage={currentImageFile} onError={setError} adjustmentResults={adjustmentResults} onApplyResult={handleApplyAdjustmentResult} adjustmentProgress={adjustmentProgress} />}
               {activeTab === 'filters' && <FilterPanel onApplyFilter={handleApplyFilter} isLoading={isLoading} currentImage={currentImageFile} onError={setError} />}
               {activeTab === 'texture' && <TexturePanel onApplyTexture={handleApplyTexture} isLoading={isLoading} currentImage={currentImageFile} onError={setError} />}
               {activeTab === 'erase' && <ErasePanel onRemoveBackground={handleRemoveBackground} isLoading={isLoading} />}

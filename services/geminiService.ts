@@ -301,6 +301,138 @@ export const generateAdjustedImage = async (imageFile: File, prompt: string): Pr
     return callImageEditingModel([imagePart, textPart], '调整');
 };
 
+// 批量生成调整图片
+export const generateAdjustedImages = async (
+    imageFile: File,
+    prompt: string, 
+    count: number = 1,
+    variationIntensity: string = 'moderate',
+    onProgress?: (imageUrl: string, current: number, total: number) => void
+): Promise<string[]> => {
+    try {
+        const results: string[] = [];
+        
+        // 根据变化强度定义不同的调整变化描述
+        const variationSets = {
+            subtle: [
+                "with subtle color temperature adjustment maintaining natural appearance",
+                "with gentle contrast enhancement preserving original mood",
+                "with minimal saturation tweaks keeping realistic tones",
+                "with soft lighting adjustment for natural depth",
+                "with delicate shadow and highlight balance",
+                "with slight clarity enhancement without over-sharpening",
+                "with minor brightness adjustment maintaining exposure balance",
+                "with gentle color grading preserving skin tones"
+            ],
+            moderate: [
+                "with professional color correction and balanced exposure",
+                "with enhanced contrast and vibrant but natural colors",
+                "with improved lighting and shadow detail enhancement",
+                "with refined saturation and temperature for warmer tones",
+                "with careful highlight recovery and shadow lifting",
+                "with selective color adjustments for better visual appeal",
+                "with dynamic range optimization for better detail",
+                "with professional-grade tone mapping and color balance",
+                "with enhanced depth and three-dimensional feel",
+                "with improved clarity and detail definition",
+                "with optimized brightness and exposure correction",
+                "with artistic color grading while maintaining realism"
+            ],
+            dramatic: [
+                "with bold creative color grading and enhanced atmosphere",
+                "with dramatic lighting changes and mood transformation", 
+                "with high-contrast artistic processing and visual impact",
+                "with creative tone mapping for cinematic appearance",
+                "with enhanced saturation and vivid color interpretation",
+                "with artistic shadow and highlight manipulation",
+                "with dramatic exposure adjustments for artistic effect",
+                "with creative color shifts while preserving subject integrity"
+            ]
+        };
+
+        const variations = variationSets[variationIntensity] || variationSets.moderate;
+        
+        for (let i = 0; i < count; i++) {
+            try {
+                const imagePart = await fileToGenerativePart(imageFile);
+                
+                // 为每次调用选择不同的变化描述
+                const variationDesc = variations[i % variations.length];
+                
+                // 构建带变化的提示词
+                const adjustmentPrompt = `Apply this adjustment: ${prompt} ${variationDesc}`;
+                const textPart = { text: adjustmentPrompt };
+                
+                // 使用不同的seed和temperature来确保变化
+                const seed = Math.floor(Math.random() * 1000000);
+                const temperature = variationIntensity === 'subtle' ? 0.7 : 
+                                 variationIntensity === 'moderate' ? 0.9 : 1.1;
+                
+                const result = await callImageEditingModel([imagePart, textPart], `调整 ${i + 1}/${count}`, seed, temperature);
+                results.push(result);
+                
+                // 调用进度回调，通知UI有新图片生成
+                if (onProgress) {
+                    onProgress(result, i + 1, count);
+                }
+                
+                // 添加延迟避免请求过快
+                if (i < count - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5秒延迟
+                }
+            } catch (error: any) {
+                console.error(`Failed to generate adjusted image ${i + 1}/${count}:`, error);
+                
+                // 使用默认失败图片
+                let errorPlaceholder;
+                try {
+                    const response = await fetch('./image_gen_failed.png');
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        errorPlaceholder = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                    } else {
+                        // 备用：1x1 透明像素
+                        errorPlaceholder = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+                    }
+                } catch (loadError) {
+                    // 备用：1x1 透明像素
+                    errorPlaceholder = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+                }
+                
+                // 记录错误信息，但继续处理
+                const errorMessage = error.message || '未知错误';
+                console.warn(`图片 ${i + 1}/${count} 生成失败: ${errorMessage}，跳过并继续...`);
+                
+                // 添加占位符到结果中（标记为错误）
+                results.push(`${errorPlaceholder}#error=${encodeURIComponent(errorMessage)}`);
+                
+                // 如果有进度回调，通知失败但继续
+                if (onProgress) {
+                    onProgress(`${errorPlaceholder}#error=${encodeURIComponent(`图片 ${i + 1} 失败: ${errorMessage}`)}`, i + 1, count);
+                }
+                
+                // 仍然添加延迟，避免过快请求
+                if (i < count - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+            }
+        }
+        
+        if (results.length === 0) {
+            throw new Error('所有图片调整都失败了');
+        }
+        
+        return results;
+
+    } catch (e) {
+       throw handleApiError(e, '批量调整');
+    }
+};
+
 export const generateTexturedImage = async (imageFile: File, prompt: string): Promise<string> => {
     const imagePart = await fileToGenerativePart(imageFile);
     const textPart = { text: `Apply this texture: ${prompt}` };
