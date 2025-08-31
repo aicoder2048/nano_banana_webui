@@ -28,3 +28,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# User's custom prompts (private)
+custom-prompts.md
