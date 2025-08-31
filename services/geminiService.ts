@@ -363,12 +363,11 @@ export const generateAdjustedImages = async (
                 const adjustmentPrompt = `Apply this adjustment: ${prompt} ${variationDesc}`;
                 const textPart = { text: adjustmentPrompt };
                 
-                // 使用不同的seed和temperature来确保变化
-                const seed = Math.floor(Math.random() * 1000000);
-                const temperature = variationIntensity === 'subtle' ? 0.7 : 
-                                 variationIntensity === 'moderate' ? 0.9 : 1.1;
+                // 使用不同的temperature来确保变化（不使用seed，因为API可能不支持）
+                const temperature = variationIntensity === 'subtle' ? 0.5 : 
+                                 variationIntensity === 'moderate' ? 0.8 : 1.0;
                 
-                const result = await callImageEditingModel([imagePart, textPart], `调整 ${i + 1}/${count}`, seed, temperature);
+                const result = await callImageEditingModel([imagePart, textPart], `调整 ${i + 1}/${count}`, undefined, temperature);
                 results.push(result);
                 
                 // 调用进度回调，通知UI有新图片生成
@@ -549,30 +548,25 @@ export const generateFusedImages = async (
                 const textPart = { text: fullPrompt };
                 const allParts = [mainImagePart, ...sourceImageParts.map(p => ({ inlineData: p.inlineData })), textPart];
                 
-                // 为每张图片生成不同的种子和温度
-                const seed = Math.floor(Math.random() * 1000000);
-                
-                // 根据变化强度调整温度范围
-                let baseTemp, tempRange;
+                // 根据变化强度调整温度（保持在0-1范围内）
+                let temperature;
                 switch (variationIntensity) {
                     case 'subtle':
-                        baseTemp = 0.6;
-                        tempRange = 0.2; // 0.6 到 0.8
+                        // 0.4 到 0.6
+                        temperature = 0.4 + (i * 0.2 / Math.max(count - 1, 1));
                         break;
                     case 'dramatic':
-                        baseTemp = 0.8;
-                        tempRange = 0.5; // 0.8 到 1.3
+                        // 0.7 到 1.0
+                        temperature = 0.7 + (i * 0.3 / Math.max(count - 1, 1));
                         break;
                     default: // moderate
-                        baseTemp = 0.7;
-                        tempRange = 0.3; // 0.7 到 1.0
+                        // 0.5 到 0.8
+                        temperature = 0.5 + (i * 0.3 / Math.max(count - 1, 1));
                         break;
                 }
                 
-                const temperature = baseTemp + (i * tempRange / Math.max(count - 1, 1));
-                
-                // 直接调用，不重试以节省时间
-                const result = await callImageEditingModel(allParts, `合成 ${i + 1}/${count}`, seed, temperature);
+                // 直接调用，不使用seed（API可能不支持）
+                const result = await callImageEditingModel(allParts, `合成 ${i + 1}/${count}`, undefined, temperature);
                 results.push(result);
                 
                 // 调用进度回调，通知UI有新图片生成
