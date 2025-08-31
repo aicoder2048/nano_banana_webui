@@ -312,41 +312,41 @@ export const generateAdjustedImages = async (
     try {
         const results: string[] = [];
         
-        // 根据变化强度定义不同的调整变化描述
+        // 根据变化强度定义不同的调整变化描述 - 更有创意的变化
         const variationSets = {
             subtle: [
-                "with subtle color temperature adjustment maintaining natural appearance",
-                "with gentle contrast enhancement preserving original mood",
-                "with minimal saturation tweaks keeping realistic tones",
-                "with soft lighting adjustment for natural depth",
-                "with delicate shadow and highlight balance",
-                "with slight clarity enhancement without over-sharpening",
-                "with minor brightness adjustment maintaining exposure balance",
-                "with gentle color grading preserving skin tones"
+                "while slightly changing the background to a similar but different environment",
+                "with person's head turned slightly in a different direction",
+                "adjusting the camera angle to capture from a slightly different perspective",
+                "with subtle changes to clothing colors or patterns",
+                "adding soft natural elements like plants or furniture in the background",
+                "with person's expression slightly changed to be more relaxed or engaged",
+                "shifting the composition to place subject slightly off-center",
+                "with gentle atmospheric effects like soft window light or ambient glow"
             ],
             moderate: [
-                "with professional color correction and balanced exposure",
-                "with enhanced contrast and vibrant but natural colors",
-                "with improved lighting and shadow detail enhancement",
-                "with refined saturation and temperature for warmer tones",
-                "with careful highlight recovery and shadow lifting",
-                "with selective color adjustments for better visual appeal",
-                "with dynamic range optimization for better detail",
-                "with professional-grade tone mapping and color balance",
-                "with enhanced depth and three-dimensional feel",
-                "with improved clarity and detail definition",
-                "with optimized brightness and exposure correction",
-                "with artistic color grading while maintaining realism"
+                "changing the background to a completely different indoor setting like cafe, office, or home",
+                "with person in a different natural pose - standing if sitting, or vice versa",
+                "transforming to an outdoor environment with natural lighting",
+                "adjusting the person's outfit style while maintaining their identity",
+                "adding interesting foreground elements that frame the subject",
+                "changing from day to golden hour or evening lighting atmosphere",
+                "with creative depth of field focusing on different elements",
+                "incorporating motion blur or dynamic movement into the scene",
+                "changing to a different season or weather condition visible in scene",
+                "with artistic reflections or shadows adding visual interest",
+                "repositioning to show different body angles - profile, three-quarter view, or back view",
+                "adding contextual props that suggest different activities or professions"
             ],
             dramatic: [
-                "with bold creative color grading and enhanced atmosphere",
-                "with dramatic lighting changes and mood transformation", 
-                "with high-contrast artistic processing and visual impact",
-                "with creative tone mapping for cinematic appearance",
-                "with enhanced saturation and vivid color interpretation",
-                "with artistic shadow and highlight manipulation",
-                "with dramatic exposure adjustments for artistic effect",
-                "with creative color shifts while preserving subject integrity"
+                "completely transforming the setting to exotic locations like beach, mountains, or cityscape",
+                "with person in dramatically different pose - jumping, dancing, or athletic stance",
+                "converting to artistic styles like noir photography or vintage film aesthetic",
+                "placing in futuristic or fantasy environments with creative lighting",
+                "dramatic costume or outfit changes suggesting different eras or cultures",
+                "with surreal or dreamlike elements blended into the scene",
+                "extreme perspective changes like aerial view or ground-level dramatic angle",
+                "transforming into different times of day with corresponding mood - sunrise, sunset, night with city lights"
             ]
         };
 
