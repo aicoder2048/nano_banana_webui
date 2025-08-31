@@ -346,10 +346,10 @@ export const generateFusedImages = async (
                 "gentle color harmony with minimal adjustments, keeping authentic photographic look"
             ],
             moderate: [
-                "natural outdoor full-body portrait in park or garden setting with trees and greenery background, maintaining photographic realism",
+                "clean studio portrait with soft white background and professional lighting setup for clear visibility",
                 "close-up portrait photography focusing on face and shoulders only, with shallow depth of field and natural lighting", 
                 "elegant standing pose with one hand on hip and confident posture against neutral background",
-                "side profile view photography showing elegant silhouette from 90-degree angle with dramatic lighting",
+                "casual indoor portrait with soft natural window lighting and comfortable home environment setting",
                 "single person walking pose captured in mid-step with natural stride and balanced movement",
                 "back view or over-shoulder perspective showing person looking away or turning head back toward camera",
                 "medium shot composition from waist up with arms and upper body clearly visible in frame",
