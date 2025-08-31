@@ -261,6 +261,24 @@ export const generateImageFromText = async (prompt: string, aspectRatio: string)
         }
         throw new Error('AI 未能生成图片。');
     } catch (e) {
+        console.error('生成图片失败:', e);
+        
+        // 尝试返回默认失败图片
+        try {
+            const response = await fetch('./image_gen_failed.png');
+            if (response.ok) {
+                const blob = await response.blob();
+                return await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.readAsDataURL(blob);
+                });
+            }
+        } catch (loadError) {
+            console.error('加载默认失败图片失败:', loadError);
+        }
+        
+        // 最终备用：抛出原始错误
         throw handleApiError(e, '生成图片');
     }
 };
@@ -437,8 +455,25 @@ export const generateFusedImages = async (
             } catch (error: any) {
                 console.error(`Failed to generate fusion image ${i + 1}/${count}:`, error);
                 
-                // 创建错误占位符图片（1x1 透明像素）
-                const errorPlaceholder = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+                // 使用默认失败图片
+                let errorPlaceholder;
+                try {
+                    const response = await fetch('./image_gen_failed.png');
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        errorPlaceholder = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                    } else {
+                        // 备用：1x1 透明像素
+                        errorPlaceholder = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+                    }
+                } catch (loadError) {
+                    // 备用：1x1 透明像素
+                    errorPlaceholder = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+                }
                 
                 // 记录错误信息，但继续处理
                 const errorMessage = error.message || '未知错误';
