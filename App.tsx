@@ -15,7 +15,7 @@ import CropPanel from './components/CropPanel';
 import FusionPanel from './components/FusionPanel';
 import TexturePanel from './components/TexturePanel';
 import ErasePanel from './components/ErasePanel';
-import { UndoIcon, RedoIcon, EyeIcon, BullseyeIcon, DownloadIcon, RefreshIcon, NewFileIcon } from './components/icons';
+import { UndoIcon, RedoIcon, EyeIcon, BullseyeIcon, DownloadIcon, RefreshIcon, NewFileIcon, UploadIcon } from './components/icons';
 import StartScreen from './components/StartScreen';
 import PastForwardPage from './components/PastForwardPage';
 
@@ -443,16 +443,44 @@ const EditorView: React.FC<{
     }
   }, [lastAction, history, historyIndex, isLoading]);
   
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleUploadNewImage = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  }, []);
+  
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleLocalFileSelect(e.target.files);
+  };
+
   const ActionButtons = () => (
     <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        accept="image/*"
+        onChange={handleFileInputChange}
+      />
       <button
         onClick={handleStartOver}
         disabled={isLoading}
         className="p-3 bg-white/10 rounded-full text-gray-300 hover:bg-white/20 transition-all active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
-        aria-label="新图片"
-        title="新图片"
+        aria-label="回主页"
+        title="回主页"
       >
         <NewFileIcon className="w-6 h-6" />
+      </button>
+      <button
+        onClick={handleUploadNewImage}
+        disabled={isLoading}
+        className="p-3 bg-white/10 rounded-full text-gray-300 hover:bg-white/20 transition-all active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
+        aria-label="更换主图"
+        title="更换主图"
+      >
+        <UploadIcon className="w-6 h-6" />
       </button>
       <button
         onClick={handleUndo}
