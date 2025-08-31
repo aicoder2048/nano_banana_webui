@@ -209,48 +209,84 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
             fusionResults.length <= 48 ? 'grid-cols-4 md:grid-cols-8' :
             'grid-cols-5 md:grid-cols-10'
           }`}>
-            {fusionResults.map((result, index) => (
-              <div key={index} className="relative group">
-                <img 
-                  src={result} 
-                  alt={`合成结果 ${index + 1}`}
-                  className="w-full h-auto rounded-lg shadow-lg"
-                />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
-                  {onApplyResult && (
-                    <button
-                      onClick={() => onApplyResult(result)}
-                      className="px-3 py-1 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors"
-                    >
-                      应用
-                    </button>
-                  )}
-                  <button
-                    onClick={() => {
-                      const link = document.createElement('a');
-                      link.href = result;
-                      
-                      // 生成时间戳格式 yymmdd-hhmmss
-                      const now = new Date();
-                      const timestamp = [
-                        String(now.getFullYear()).slice(-2).padStart(2, '0'), // yy
-                        String(now.getMonth() + 1).padStart(2, '0'), // mm
-                        String(now.getDate()).padStart(2, '0') // dd
-                      ].join('') + '-' + [
-                        String(now.getHours()).padStart(2, '0'), // hh
-                        String(now.getMinutes()).padStart(2, '0'), // mm
-                        String(now.getSeconds()).padStart(2, '0') // ss
-                      ].join('');
-                      
-                      link.download = `fusion_${index + 1}_${timestamp}.jpg`;
-                      link.click();
-                    }}
-                    className="px-3 py-1 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
-                  >
-                    下载
-                  </button>
-                  <button
-                    onClick={() => {
+            {fusionResults.map((result, index) => {
+              // 检查是否是错误占位符
+              const isError = result.includes('#error=');
+              let errorMessage = '';
+              let imageUrl = result;
+              
+              if (isError) {
+                const parts = result.split('#error=');
+                imageUrl = parts[0];
+                try {
+                  errorMessage = decodeURIComponent(parts[1]);
+                } catch {
+                  errorMessage = '生成失败';
+                }
+              }
+              
+              return (
+                <div key={index} className="relative group">
+                  {isError ? (
+                    // 错误状态显示
+                    <div className="w-full aspect-square bg-gray-800 rounded-lg shadow-lg flex flex-col items-center justify-center p-4">
+                      <div className="text-red-500 mb-2">
+                        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="text-gray-400 text-sm text-center">
+                        图片 {index + 1} 失败
+                      </div>
+                      <div className="text-gray-500 text-xs text-center mt-1">
+                        {errorMessage.includes('PROHIBITED_CONTENT') ? '内容被安全过滤' : 
+                         errorMessage.includes('API 响应中没有内容') ? 'API 响应错误' :
+                         errorMessage.substring(0, 50)}
+                      </div>
+                    </div>
+                  ) : (
+                    // 正常图片显示
+                    <>
+                      <img 
+                        src={result} 
+                        alt={`合成结果 ${index + 1}`}
+                        className="w-full h-auto rounded-lg shadow-lg"
+                      />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                        {onApplyResult && (
+                          <button
+                            onClick={() => onApplyResult(result)}
+                            className="px-3 py-1 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors"
+                          >
+                            应用
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = result;
+                            
+                            // 生成时间戳格式 yymmdd-hhmmss
+                            const now = new Date();
+                            const timestamp = [
+                              String(now.getFullYear()).slice(-2).padStart(2, '0'), // yy
+                              String(now.getMonth() + 1).padStart(2, '0'), // mm
+                              String(now.getDate()).padStart(2, '0') // dd
+                            ].join('') + '-' + [
+                              String(now.getHours()).padStart(2, '0'), // hh
+                              String(now.getMinutes()).padStart(2, '0'), // mm
+                              String(now.getSeconds()).padStart(2, '0') // ss
+                            ].join('');
+                            
+                            link.download = `fusion_${index + 1}_${timestamp}.jpg`;
+                            link.click();
+                          }}
+                          className="px-3 py-1 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
+                        >
+                          下载
+                        </button>
+                        <button
+                          onClick={() => {
                       // 创建包含所有图片和功能的HTML页面
                       const htmlContent = `
 <!DOCTYPE html>
@@ -606,9 +642,12 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
                   >
                     放大
                   </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

@@ -434,13 +434,28 @@ export const generateFusedImages = async (
                 if (i < count - 1) {
                     await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5秒延迟
                 }
-            } catch (error) {
-                console.error(`Failed to generate fusion image ${i + 1}:`, error);
-                // 如果是第一张就失败，抛出错误
-                if (i === 0 && results.length === 0) {
-                    throw error;
+            } catch (error: any) {
+                console.error(`Failed to generate fusion image ${i + 1}/${count}:`, error);
+                
+                // 创建错误占位符图片（1x1 透明像素）
+                const errorPlaceholder = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+                
+                // 记录错误信息，但继续处理
+                const errorMessage = error.message || '未知错误';
+                console.warn(`图片 ${i + 1}/${count} 生成失败: ${errorMessage}，跳过并继续...`);
+                
+                // 添加占位符到结果中（标记为错误）
+                results.push(`${errorPlaceholder}#error=${encodeURIComponent(errorMessage)}`);
+                
+                // 如果有进度回调，通知失败但继续
+                if (onProgress) {
+                    onProgress(`${errorPlaceholder}#error=${encodeURIComponent(`图片 ${i + 1} 失败: ${errorMessage}`)}`, i + 1, count);
                 }
-                // 否则继续生成其他图片
+                
+                // 仍然添加延迟，避免过快请求
+                if (i < count - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
             }
         }
         
