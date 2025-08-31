@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { UploadIcon, XMarkIcon } from './icons';
+import { loadCustomPrompts } from '../utils/promptLoader';
 
 interface FusionPanelProps {
   onApplyFusion: (sourceImages: File[], prompt: string, count: number, variationIntensity?: string) => void;
@@ -26,8 +27,14 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
   const [showVariationHint, setShowVariationHint] = useState(false);
   const [variationIntensity, setVariationIntensity] = useState<'subtle' | 'moderate' | 'dramatic'>('moderate');
   
+  // 提示词相关状态
+  const [customPrompts, setCustomPrompts] = useState<string[]>([]);
+  const [showPromptDropdown, setShowPromptDropdown] = useState(false);
+  const [isLoadingPrompts, setIsLoadingPrompts] = useState(false);
+  
   const fileInputRef1 = useRef<HTMLInputElement>(null);
   const fileInputRef2 = useRef<HTMLInputElement>(null);
+  const promptDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleApply = () => {
     const sourceFiles = [sourceImageFile1, sourceImageFile2].filter(Boolean) as File[];
@@ -35,6 +42,53 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
         onApplyFusion(sourceFiles, prompt, imageCount, variationIntensity);
     }
   };
+
+  // 加载自定义提示词
+  const handleLoadPrompts = async () => {
+    if (showPromptDropdown) {
+      // 如果已经显示，则关闭
+      setShowPromptDropdown(false);
+      return;
+    }
+    
+    // 显示加载状态
+    setIsLoadingPrompts(true);
+    setShowPromptDropdown(true);
+    
+    try {
+      // 每次都重新加载文件内容，支持动态修改
+      const prompts = await loadCustomPrompts();
+      setCustomPrompts(prompts);
+    } catch (error) {
+      console.error('载入提示词失败:', error);
+      setCustomPrompts([]);
+    } finally {
+      setIsLoadingPrompts(false);
+    }
+  };
+
+  // 选择提示词
+  const handleSelectPrompt = (selectedPrompt: string) => {
+    setPrompt(selectedPrompt);
+    setShowPromptDropdown(false);
+  };
+
+  // 点击外部关闭下拉菜单
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (promptDropdownRef.current && !promptDropdownRef.current.contains(event.target as Node)) {
+        setShowPromptDropdown(false);
+      }
+    };
+
+    if (showPromptDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showPromptDropdown]);
 
   const ImageUploader: React.FC<{
     id: number;
@@ -174,7 +228,7 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
         </div>
       )}
       
-      <div className="w-full flex gap-2">
+      <div className="w-full flex gap-2 relative" ref={promptDropdownRef}>
         <input
           type="text"
           value={prompt}
@@ -183,6 +237,46 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
           className="flex-grow bg-gray-800 border border-gray-600 text-gray-200 rounded-lg p-4 focus:ring-2 focus:ring-blue-500 focus:outline-none transition w-full disabled:cursor-not-allowed disabled:opacity-60 text-base"
           disabled={isLoading || (!sourceImageFile1 && !sourceImageFile2)}
         />
+        
+        {/* 载入按钮 */}
+        <button
+          onClick={handleLoadPrompts}
+          className="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-4 px-4 rounded-lg transition-colors text-base disabled:bg-gray-700 disabled:cursor-not-allowed"
+          disabled={isLoading}
+          title="载入预设提示词"
+        >
+          载入
+        </button>
+        
+        {/* 下拉菜单 - 跨越整个输入区域 */}
+        {showPromptDropdown && (
+          <div className="absolute top-full mt-1 left-0 right-24 bg-gray-800 border border-gray-600 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
+            {isLoadingPrompts ? (
+              <div className="p-4 text-gray-400 text-sm flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                正在加载提示词模板...
+              </div>
+            ) : customPrompts.length === 0 ? (
+              <div className="p-4 text-gray-400 text-sm">
+                暂无可用的提示词模板
+              </div>
+            ) : (
+              customPrompts.map((promptText, index) => (
+                <div
+                  key={index}
+                  onClick={() => handleSelectPrompt(promptText)}
+                  className="p-3 text-gray-200 text-sm hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+                >
+                  {promptText.length > 80 
+                    ? `${promptText.substring(0, 80)}...` 
+                    : promptText
+                  }
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
         <button
           onClick={handleApply}
           className="bg-gradient-to-br from-purple-600 to-purple-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-base disabled:from-purple-800 disabled:to-purple-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
