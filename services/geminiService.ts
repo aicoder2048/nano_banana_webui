@@ -154,6 +154,9 @@ const callImageEditingModel = async (parts: any[], action: string, seed?: number
     try {
         const ai = getGoogleAI();
         
+        // 生成随机种子（如果未提供）
+        const actualSeed = seed !== undefined ? seed : Math.floor(Math.random() * 1000000);
+        
         // 构建请求配置，包含变化参数
         const requestConfig: any = {
             model: 'gemini-2.5-flash-image-preview',
@@ -162,8 +165,8 @@ const callImageEditingModel = async (parts: any[], action: string, seed?: number
                 responseModalities: [Modality.IMAGE, Modality.TEXT],
                 // 添加温度控制以增加变化
                 temperature: temperature ?? 0.9,
-                // 如果API支持seed参数，可以尝试添加
-                ...(seed !== undefined && { seed: seed })
+                // 添加种子参数以控制随机性
+                seed: actualSeed
             }
         };
 
@@ -286,19 +289,22 @@ export const generateImageFromText = async (prompt: string, aspectRatio: string)
 export const generateEditedImage = async (imageFile: File, prompt: string, hotspot: { x: number; y: number }): Promise<string> => {
     const imagePart = await fileToGenerativePart(imageFile);
     const textPart = { text: `Apply this edit at hotspot (${hotspot.x}, ${hotspot.y}): ${prompt}` };
-    return callImageEditingModel([imagePart, textPart], '修饰');
+    const seed = Math.floor(Math.random() * 1000000);
+    return callImageEditingModel([imagePart, textPart], '修饰', seed);
 };
 
 export const generateFilteredImage = async (imageFile: File, prompt: string): Promise<string> => {
     const imagePart = await fileToGenerativePart(imageFile);
     const textPart = { text: `Apply this filter: ${prompt}` };
-    return callImageEditingModel([imagePart, textPart], '滤镜');
+    const seed = Math.floor(Math.random() * 1000000);
+    return callImageEditingModel([imagePart, textPart], '滤镜', seed);
 };
 
 export const generateAdjustedImage = async (imageFile: File, prompt: string): Promise<string> => {
     const imagePart = await fileToGenerativePart(imageFile);
     const textPart = { text: `Apply this adjustment: ${prompt}` };
-    return callImageEditingModel([imagePart, textPart], '调整');
+    const seed = Math.floor(Math.random() * 1000000);
+    return callImageEditingModel([imagePart, textPart], '调整', seed);
 };
 
 // 批量生成调整图片
@@ -363,11 +369,14 @@ export const generateAdjustedImages = async (
                 const adjustmentPrompt = `Apply this adjustment: ${prompt} ${variationDesc}`;
                 const textPart = { text: adjustmentPrompt };
                 
-                // 使用不同的temperature来确保变化（不使用seed，因为API可能不支持）
+                // 使用不同的temperature和seed来确保变化
                 const temperature = variationIntensity === 'subtle' ? 0.5 : 
                                  variationIntensity === 'moderate' ? 0.8 : 1.0;
                 
-                const result = await callImageEditingModel([imagePart, textPart], `调整 ${i + 1}/${count}`, undefined, temperature);
+                // 为每个图片生成不同的种子
+                const seed = Math.floor(Math.random() * 1000000) + i;
+                
+                const result = await callImageEditingModel([imagePart, textPart], `调整 ${i + 1}/${count}`, seed, temperature);
                 results.push(result);
                 
                 // 调用进度回调，通知UI有新图片生成
@@ -435,13 +444,15 @@ export const generateAdjustedImages = async (
 export const generateTexturedImage = async (imageFile: File, prompt: string): Promise<string> => {
     const imagePart = await fileToGenerativePart(imageFile);
     const textPart = { text: `Apply this texture: ${prompt}` };
-    return callImageEditingModel([imagePart, textPart], '纹理');
+    const seed = Math.floor(Math.random() * 1000000);
+    return callImageEditingModel([imagePart, textPart], '纹理', seed);
 };
 
 export const removeBackgroundImage = async (imageFile: File): Promise<string> => {
     const imagePart = await fileToGenerativePart(imageFile);
     const textPart = { text: 'Remove the background of this image, leaving only the main subject with a transparent background.' };
-    return callImageEditingModel([imagePart, textPart], '抠图');
+    const seed = Math.floor(Math.random() * 1000000);
+    return callImageEditingModel([imagePart, textPart], '抠图', seed);
 };
 
 export const generateFusedImage = async (mainImage: File, sourceImages: File[], prompt: string): Promise<string> => {
@@ -463,7 +474,8 @@ export const generateFusedImage = async (mainImage: File, sourceImages: File[], 
         const textPart = { text: fullPrompt };
         const allParts = [mainImagePart, ...sourceImageParts.map(p => ({ inlineData: p.inlineData })), textPart];
         
-        return await callImageEditingModel(allParts, '合成');
+        const seed = Math.floor(Math.random() * 1000000);
+        return await callImageEditingModel(allParts, '合成', seed);
 
     } catch (e) {
        throw handleApiError(e, '合成');
@@ -565,8 +577,11 @@ export const generateFusedImages = async (
                         break;
                 }
                 
-                // 直接调用，不使用seed（API可能不支持）
-                const result = await callImageEditingModel(allParts, `合成 ${i + 1}/${count}`, undefined, temperature);
+                // 为每个合成生成唯一的种子
+                const seed = Math.floor(Math.random() * 1000000) + i * 1000;
+                
+                // 使用种子和温度调用
+                const result = await callImageEditingModel(allParts, `合成 ${i + 1}/${count}`, seed, temperature);
                 results.push(result);
                 
                 // 调用进度回调，通知UI有新图片生成
