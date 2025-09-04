@@ -318,41 +318,37 @@ export const generateAdjustedImages = async (
     try {
         const results: string[] = [];
         
-        // 根据变化强度定义不同的调整变化描述 - 更有创意的变化
+        // 根据变化强度定义不同的摄影角度变化描述，融入著名摄影师风格
         const variationSets = {
             subtle: [
-                "while slightly changing the background to a similar but different environment",
-                "with person's head turned slightly in a different direction",
-                "adjusting the camera angle to capture from a slightly different perspective",
-                "with subtle changes to clothing colors or patterns",
-                "adding soft natural elements like plants or furniture in the background",
-                "with person's expression slightly changed to be more relaxed or engaged",
-                "shifting the composition to place subject slightly off-center",
-                "with gentle atmospheric effects like soft window light or ambient glow"
+                "shot from eye level with natural perspective and balanced composition in Ansel Adams documentary style",
+                "captured with slight high angle for gentle flattering perspective inspired by Julia Margaret Cameron portraiture",
+                "photographed with subtle low angle using Henri Cartier-Bresson's decisive moment approach",
+                "composed using rule of thirds with Irving Penn's minimalist studio aesthetic",
+                "shot with centered composition in Richard Avedon's clean portrait style",
+                "captured from three-quarter angle showing natural depth like Annie Leibovitz environmental portraits",
+                "photographed with soft side lighting in the style of Yousuf Karsh dramatic portraiture",
+                "shot with shallow depth of field focusing on main subject using Steve McCurry's intimate approach"
             ],
             moderate: [
-                "changing the background to a completely different indoor setting like cafe, office, or home",
-                "with person in a different natural pose - standing if sitting, or vice versa",
-                "transforming to an outdoor environment with natural lighting",
-                "adjusting the person's outfit style while maintaining their identity",
-                "adding interesting foreground elements that frame the subject",
-                "changing from day to golden hour or evening lighting atmosphere",
-                "with creative depth of field focusing on different elements",
-                "incorporating motion blur or dynamic movement into the scene",
-                "changing to a different season or weather condition visible in scene",
-                "with artistic reflections or shadows adding visual interest",
-                "repositioning to show different body angles - profile, three-quarter view, or back view",
-                "adding contextual props that suggest different activities or professions"
+                "captured from high angle looking down in Mario Testino's fashion photography style",
+                "shot from low angle with Helmut Newton's powerful and provocative composition",
+                "photographed from side profile showing elegant silhouette like Horst P. Horst's glamour photography",
+                "composed with diagonal lines using Vivian Maier's street photography dynamic framing",
+                "shot with off-center framing inspired by Diane Arbus's unconventional portrait approach",
+                "captured with environmental framing using Gordon Parks's documentary storytelling method",
+                "photographed from behind with subject looking back in the style of Saul Leiter's intimate moments",
+                "shot with foreground elements creating depth like Gregory Crewdson's cinematic compositions"
             ],
             dramatic: [
-                "completely transforming the setting to exotic locations like beach, mountains, or cityscape",
-                "with person in dramatically different pose - jumping, dancing, or athletic stance",
-                "converting to artistic styles like noir photography or vintage film aesthetic",
-                "placing in futuristic or fantasy environments with creative lighting",
-                "dramatic costume or outfit changes suggesting different eras or cultures",
-                "with surreal or dreamlike elements blended into the scene",
-                "extreme perspective changes like aerial view or ground-level dramatic angle",
-                "transforming into different times of day with corresponding mood - sunrise, sunset, night with city lights"
+                "captured from dramatic bird's eye view in the style of Andreas Gursky's architectural perspectives",
+                "shot from ground level worm's eye view using Alexander Rodchenko's revolutionary angles",
+                "photographed with strong Dutch angle inspired by László Moholy-Nagy's experimental compositions",
+                "composed with extreme close-up focusing on details like Richard Avedon's intense portraits",
+                "shot from far distance with telephoto compression using Thomas Struth's large-format approach",
+                "captured with wide-angle perspective in Sebastião Salgado's epic documentary style",
+                "photographed with strong backlighting creating silhouette like Fan Ho's geometric light studies",
+                "shot with subject turning around mid-motion inspired by Jacques Henri Lartigue's spontaneous captures"
             ]
         };
 
@@ -494,45 +490,37 @@ export const generateFusedImages = async (
     try {
         const results: string[] = [];
         
-        // 根据变化强度定义不同的摄影风格变化描述，保持照片真实性
+        // 根据变化强度定义不同的摄影角度变化描述，融入著名摄影师风格
         const variationSets = {
             subtle: [
-                "standard photographic composition with natural lighting and balanced colors, maintaining photographic realism",
-                "slightly warmer color temperature with gentle shadows, keeping natural photo appearance",
-                "marginally enhanced contrast with soft highlights, preserving realistic photo quality",
-                "delicate color grading with subtle tone adjustments, maintaining photographic authenticity",
-                "refined lighting with gentle depth enhancement, keeping natural photo characteristics",
-                "minor composition tweaks with natural flow, preserving realistic photographic style",
-                "soft focus variations with subtle detail enhancement, maintaining photo realism",
-                "gentle color harmony with minimal adjustments, keeping authentic photographic look"
+                "shot from eye level with natural perspective and balanced composition in Ansel Adams documentary style",
+                "captured with slight high angle for gentle flattering perspective inspired by Julia Margaret Cameron portraiture",
+                "photographed with subtle low angle using Henri Cartier-Bresson's decisive moment approach",
+                "composed using rule of thirds with Irving Penn's minimalist studio aesthetic",
+                "shot with centered composition in Richard Avedon's clean portrait style",
+                "captured from three-quarter angle showing natural depth like Annie Leibovitz environmental portraits",
+                "photographed with soft side lighting in the style of Yousuf Karsh dramatic portraiture",
+                "shot with shallow depth of field focusing on main subject using Steve McCurry's intimate approach"
             ],
             moderate: [
-                "clean studio portrait with soft white background and professional lighting setup for clear visibility",
-                "close-up portrait photography focusing on face and shoulders only, with shallow depth of field and natural lighting", 
-                "elegant standing pose with one hand on hip and confident posture against neutral background",
-                "casual indoor portrait with soft natural window lighting and comfortable home environment setting",
-                "single person walking pose captured in mid-step with natural stride and balanced movement",
-                "back view or over-shoulder perspective showing person looking away or turning head back toward camera",
-                "medium shot composition from waist up with arms and upper body clearly visible in frame",
-                "overhead angle photography shot from above looking down at subject with unique bird's-eye perspective",
-                "three-quarter angle portrait showing face and body from 45-degree angle with natural lighting",
-                "full-body portrait with arms crossed pose showing confidence and strength in composition",
-                "elegant kneeling pose on one knee with upright posture and graceful positioning",
-                "standing against wall or architectural element with one shoulder leaning for support"
+                "captured from high angle looking down in Mario Testino's fashion photography style",
+                "shot from low angle with Helmut Newton's powerful and provocative composition",
+                "photographed from side profile showing elegant silhouette like Horst P. Horst's glamour photography",
+                "composed with diagonal lines using Vivian Maier's street photography dynamic framing",
+                "shot with off-center framing inspired by Diane Arbus's unconventional portrait approach",
+                "captured with environmental framing using Gordon Parks's documentary storytelling method",
+                "photographed from behind with subject looking back in the style of Saul Leiter's intimate moments",
+                "shot with foreground elements creating depth like Gregory Crewdson's cinematic compositions"
             ],
             dramatic: [
-                "dramatic low-angle shot looking up at subject from below with powerful perspective and strong lighting contrast",
-                "artistic black and white portrait with high contrast lighting and emotional facial expression in monochrome style",
-                "fashion model pose with one leg slightly forward and hands positioned elegantly at sides", 
-                "fashion editorial with bold geometric poses and dramatic hand gestures against minimalist background",
-                "intimate close-up beauty shot focusing on eyes and facial features with soft romantic lighting",
-                "urban street photography style with natural city environment and candid documentary approach",
-                "artistic lying down pose photographed from interesting angle with creative composition and depth",
-                "dramatic backlighting silhouette with rim lighting effect creating striking outline against bright background",
-                "high-contrast studio portrait with dramatic shadow patterns across face and body",
-                "elegant full-body pose with flowing fabric or clothing creating dynamic visual interest",
-                "moody atmospheric portrait with dramatic chiaroscuro lighting technique and deep shadows",
-                "architectural portrait using building elements or columns to frame the subject creatively"
+                "captured from dramatic bird's eye view in the style of Andreas Gursky's architectural perspectives",
+                "shot from ground level worm's eye view using Alexander Rodchenko's revolutionary angles",
+                "photographed with strong Dutch angle inspired by László Moholy-Nagy's experimental compositions",
+                "composed with extreme close-up focusing on details like Richard Avedon's intense portraits",
+                "shot from far distance with telephoto compression using Thomas Struth's large-format approach",
+                "captured with wide-angle perspective in Sebastião Salgado's epic documentary style",
+                "photographed with strong backlighting creating silhouette like Fan Ho's geometric light studies",
+                "shot with subject turning around mid-motion inspired by Jacques Henri Lartigue's spontaneous captures"
             ]
         };
         
