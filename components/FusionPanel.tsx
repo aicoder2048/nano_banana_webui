@@ -511,10 +511,11 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
       max-width: 100%;
       max-height: 100%;
       cursor: pointer;
-      transition: transform 0.3s;
+      transition: transform 0.3s ease;
     }
     .main-image.zoomed {
-      transform: scale(1.5);
+      transform: scale(2) translate(var(--translate-x, 0), var(--translate-y, 0));
+      cursor: move;
     }
     .hint {
       position: absolute;
@@ -603,6 +604,8 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
     let currentIndex = ${index};
     let isZoomed = false;
     let ratings = {};
+    let translateX = 0;
+    let translateY = 0;
     
     // 设置默认评分为5星
     for (let i = 0; i < images.length; i++) {
@@ -626,9 +629,13 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
       // 更新评分显示
       updateRatingDisplay();
       
-      // 重置缩放
+      // 重置缩放和平移
       isZoomed = false;
+      translateX = 0;
+      translateY = 0;
       img.className = 'main-image';
+      img.style.removeProperty('--translate-x');
+      img.style.removeProperty('--translate-y');
       document.getElementById('hint').textContent = '点击图片放大 | 使用 ← → 切换图片';
     }
 
@@ -672,8 +679,17 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
     function toggleZoom() {
       const img = document.getElementById('main-image');
       isZoomed = !isZoomed;
+      
+      if (!isZoomed) {
+        // 缩小时重置平移
+        translateX = 0;
+        translateY = 0;
+        img.style.removeProperty('--translate-x');
+        img.style.removeProperty('--translate-y');
+      }
+      
       img.className = 'main-image' + (isZoomed ? ' zoomed' : '');
-      document.getElementById('hint').textContent = isZoomed ? '点击图片缩小' : '点击图片放大 | 使用 ← → 切换图片';
+      document.getElementById('hint').textContent = isZoomed ? '点击图片缩小 | 双指滑动查看' : '点击图片放大 | 使用 ← → 切换图片';
     }
 
     function setRating(rating) {
@@ -701,6 +717,27 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
       link.download = 'fusion_' + (currentIndex + 1) + '_' + timestamp + ratingSuffix + '.jpg';
       link.click();
     }
+
+    // 添加 Trackpad 双指滑动支持
+    const img = document.getElementById('main-image');
+    img.addEventListener('wheel', function(e) {
+      if (isZoomed) {
+        e.preventDefault();
+        
+        // 使用 deltaX 和 deltaY 进行平移
+        translateX -= e.deltaX * 0.5;
+        translateY -= e.deltaY * 0.5;
+        
+        // 限制平移范围（根据缩放比例调整）
+        const maxTranslate = 150; // 像素
+        translateX = Math.max(-maxTranslate, Math.min(maxTranslate, translateX));
+        translateY = Math.max(-maxTranslate, Math.min(maxTranslate, translateY));
+        
+        // 应用平移
+        img.style.setProperty('--translate-x', translateX + 'px');
+        img.style.setProperty('--translate-y', translateY + 'px');
+      }
+    }, { passive: false });
 
     // 键盘快捷键
     document.addEventListener('keydown', function(e) {
