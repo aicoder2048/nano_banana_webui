@@ -665,15 +665,36 @@ const AdjustmentPanel: React.FC<AdjustmentPanelProps> = ({ onApplyAdjustment, is
       link.click();
     }
 
-    // 添加 Trackpad 双指滑动支持
+    // 添加 Trackpad 双指滑动支持，优化左右移动体验
     const img = document.getElementById('main-image');
     img.addEventListener('wheel', function(e) {
       if (isZoomed) {
         e.preventDefault();
         
-        // 使用 deltaX 和 deltaY 进行平移
-        translateX -= e.deltaX * 0.5;
-        translateY -= e.deltaY * 0.5;
+        // 计算移动方向强度
+        const absX = Math.abs(e.deltaX);
+        const absY = Math.abs(e.deltaY);
+        
+        // 设置死区阈值，忽略微小的意外移动
+        const DEAD_ZONE = 3;
+        if (absX < DEAD_ZONE && absY < DEAD_ZONE) return;
+        
+        // 智能敏感度调整
+        let xSensitivity = 0.3; // 降低水平敏感度
+        let ySensitivity = 0.5; // 保持垂直敏感度
+        
+        // 如果主要是垂直移动（上下浏览），进一步降低水平敏感度
+        if (absY > absX * 1.8) {
+          xSensitivity = 0.15; // 大幅降低，但不完全禁用
+        }
+        // 如果主要是水平移动，稍微降低垂直敏感度
+        else if (absX > absY * 1.5) {
+          ySensitivity = 0.3;
+        }
+        
+        // 应用智能敏感度
+        translateX -= e.deltaX * xSensitivity;
+        translateY -= e.deltaY * ySensitivity;
         
         // 限制平移范围（根据缩放比例调整）
         const maxTranslate = 150; // 像素
