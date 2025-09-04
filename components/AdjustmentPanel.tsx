@@ -319,7 +319,7 @@ const AdjustmentPanel: React.FC<AdjustmentPanelProps> = ({ onApplyAdjustment, is
                               String(now.getSeconds()).padStart(2, '0') // ss
                             ].join('');
                             
-                            link.download = `adjustment_${index + 1}_${timestamp}.jpg`;
+                            link.download = `adjustment_${index + 1}_${timestamp}.png`;
                             link.click();
                           }}
                           className="px-3 py-1 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
@@ -661,7 +661,7 @@ const AdjustmentPanel: React.FC<AdjustmentPanelProps> = ({ onApplyAdjustment, is
       
       const rating = ratings[currentIndex];
       const ratingSuffix = '_' + rating + '-Stars';
-      link.download = 'adjustment_' + (currentIndex + 1) + '_' + timestamp + ratingSuffix + '.jpg';
+      link.download = 'adjustment_' + (currentIndex + 1) + '_' + timestamp + ratingSuffix + '.png';
       link.click();
     }
 

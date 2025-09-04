@@ -133,7 +133,7 @@ const PastForwardPage: React.FC = () => {
             const dataUrl = await createAlbumPage(generatedImages, DECADES);
             const link = document.createElement('a');
             link.href = dataUrl;
-            link.download = 'past-forward-album.jpg';
+            link.download = 'past-forward-album.png';
             link.click();
         } catch (e) {
             console.error("Failed to create album", e);

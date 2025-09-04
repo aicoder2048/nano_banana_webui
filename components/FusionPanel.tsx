@@ -372,7 +372,7 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
                               String(now.getSeconds()).padStart(2, '0') // ss
                             ].join('');
                             
-                            link.download = `fusion_${index + 1}_${timestamp}.jpg`;
+                            link.download = `fusion_${index + 1}_${timestamp}.png`;
                             link.click();
                           }}
                           className="px-3 py-1 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
@@ -714,7 +714,7 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
       
       const rating = ratings[currentIndex];
       const ratingSuffix = '_' + rating + '-Stars';
-      link.download = 'fusion_' + (currentIndex + 1) + '_' + timestamp + ratingSuffix + '.jpg';
+      link.download = 'fusion_' + (currentIndex + 1) + '_' + timestamp + ratingSuffix + '.png';
       link.click();
     }
 

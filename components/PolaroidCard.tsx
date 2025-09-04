@@ -50,7 +50,7 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({
         if (imageState.status === 'done' && imageState.url) {
             const link = document.createElement('a');
             link.href = imageState.url;
-            link.download = `${decade}-style-image.jpg`;
+            link.download = `${decade}-style-image.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
