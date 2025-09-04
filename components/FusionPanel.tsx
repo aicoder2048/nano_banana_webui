@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { UploadIcon, XMarkIcon } from './icons';
-import { loadCustomPrompts } from '../utils/promptLoader';
+import { loadCustomPrompts, extractActualPrompt } from '../utils/promptLoader';
 
 interface FusionPanelProps {
   onApplyFusion: (sourceImages: File[], prompt: string, count: number, variationIntensity?: string) => void;
@@ -39,7 +39,9 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
   const handleApply = () => {
     const sourceFiles = [sourceImageFile1, sourceImageFile2].filter(Boolean) as File[];
     if (sourceFiles.length > 0 && prompt.trim()) {
-        onApplyFusion(sourceFiles, prompt, imageCount, variationIntensity);
+        // 从完整提示词行中提取实际的提示词内容
+        const actualPrompt = extractActualPrompt(prompt);
+        onApplyFusion(sourceFiles, actualPrompt, imageCount, variationIntensity);
     }
   };
 
@@ -250,7 +252,10 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
         
         {/* 下拉菜单 - 跨越整个输入区域 */}
         {showPromptDropdown && (
-          <div className="absolute top-full mt-1 left-0 right-24 bg-gray-800 border border-gray-600 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
+          <div 
+            ref={promptDropdownRef}
+            className="absolute top-full mt-1 left-0 right-24 bg-gray-800 border border-gray-600 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
+          >
             {isLoadingPrompts ? (
               <div className="p-4 text-gray-400 text-sm flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
@@ -261,7 +266,13 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
                 暂无可用的提示词模板
               </div>
             ) : (
-              customPrompts.map((promptText, index) => (
+              <>
+                {customPrompts.length > 5 && (
+                  <div className="p-2 bg-gray-700 text-gray-300 text-xs text-center border-b border-gray-600">
+                    共 {customPrompts.length} 个提示词模板，可滚动查看全部
+                  </div>
+                )}
+                {customPrompts.map((promptText, index) => (
                 <div
                   key={index}
                   onClick={() => handleSelectPrompt(promptText)}
@@ -272,7 +283,8 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
                     : promptText
                   }
                 </div>
-              ))
+                ))}
+              </>
             )}
           </div>
         )}

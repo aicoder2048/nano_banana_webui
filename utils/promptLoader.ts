@@ -44,3 +44,15 @@ const parsePrompts = (text: string): string[] => {
   
   return prompts;
 };
+
+// 从完整提示词行中提取实际的提示词内容（冒号后的部分）
+export const extractActualPrompt = (fullPromptLine: string): string => {
+  const colonIndex = fullPromptLine.indexOf(':');
+  if (colonIndex === -1) {
+    // 如果没有冒号，返回原始内容（向后兼容）
+    return fullPromptLine.trim();
+  }
+  
+  // 返回冒号后的内容，去除前后空格
+  return fullPromptLine.substring(colonIndex + 1).trim();
+};

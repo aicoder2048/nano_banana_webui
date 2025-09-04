@@ -36,14 +36,23 @@ const getGoogleAI = (): GoogleGenAI => {
 
 const handleApiError = (error: any, action: string): Error => {
     console.error(`API call for "${action}" failed:`, error);
+    console.error('Full error details:', {
+        message: error.message,
+        stack: error.stack,
+        cause: error.cause,
+        errorType: typeof error,
+        errorConstructor: error.constructor?.name,
+        stringified: JSON.stringify(error, null, 2)
+    });
+    
     // Attempt to parse a meaningful message from the error object or string
-    let message = `在“${action}”期间发生错误: ${error.message || '未知通信错误'}`;
+    let message = `在"${action}"期间发生错误: ${error.message || '未知通信错误'}`;
     try {
       // Errors from the backend might be JSON strings
       const errorObj = JSON.parse(error.message);
       if (errorObj?.error?.message) {
          // Use the specific message from the API if available
-         message = `在“${action}”期间发生错误: ${errorObj.error.message}`;
+         message = `在"${action}"期间发生错误: ${errorObj.error.message}`;
       }
     } catch(e) {
       // It's not a JSON string, use the original message
@@ -51,6 +60,8 @@ const handleApiError = (error: any, action: string): Error => {
           message = '系统 API 密钥无效。';
       } else if (String(error.message).includes('xhr error')) {
            message = `与 AI 服务的通信失败。这可能是由网络问题或无效的系统 API 密钥引起的。`;
+      } else if (String(error.message).includes('Internal error')) {
+           message = `Gemini API 内部错误。请稍后重试，或者尝试简化提示词/减小图片尺寸。原始错误: ${error.message}`;
       }
     }
 
