@@ -31,3 +31,10 @@ dist-ssr
 
 # User's custom prompts (private)
 custom-prompts.md
+
+# Input/Output directories (user data)
+outputs/
+inputs/sean/
+inputs/sophia/
+inputs/clothes/
+inputs/poses/
