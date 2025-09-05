@@ -524,10 +524,12 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
       max-height: 100%;
       cursor: pointer;
       transition: transform 0.3s ease;
+      transform-origin: center center;
     }
     .main-image.zoomed {
       transform: scale(2) translate(var(--translate-x, 0), var(--translate-y, 0));
       cursor: move;
+      transform-origin: center center;
     }
     .hint {
       position: absolute;
@@ -698,6 +700,12 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
         translateY = 0;
         img.style.removeProperty('--translate-x');
         img.style.removeProperty('--translate-y');
+      } else {
+        // 放大时，稍微向上偏移，避免图片下滑
+        translateX = 0;
+        translateY = -20; // 初始向上偏移20像素
+        img.style.setProperty('--translate-x', translateX + 'px');
+        img.style.setProperty('--translate-y', translateY + 'px');
       }
       
       img.className = 'main-image' + (isZoomed ? ' zoomed' : '');
@@ -761,10 +769,34 @@ const FusionPanel: React.FC<FusionPanelProps> = ({ onApplyFusion, isLoading, onE
         translateX -= e.deltaX * xSensitivity;
         translateY -= e.deltaY * ySensitivity;
         
-        // 限制平移范围（根据缩放比例调整）
-        const maxTranslate = 150; // 像素
-        translateX = Math.max(-maxTranslate, Math.min(maxTranslate, translateX));
-        translateY = Math.max(-maxTranslate, Math.min(maxTranslate, translateY));
+        // 动态计算平移范围（根据缩放比例和图片尺寸调整）
+        const imgRect = img.getBoundingClientRect();
+        const containerRect = img.parentElement.getBoundingClientRect();
+        const scale = 2; // 缩放比例
+        
+        // 计算缩放后图片的实际尺寸
+        const scaledWidth = imgRect.width * scale;
+        const scaledHeight = imgRect.height * scale;
+        
+        // 计算最大平移范围
+        const maxTranslateX = Math.max(0, (scaledWidth - containerRect.width) / (2 * scale));
+        const maxTranslateY = Math.max(0, (scaledHeight - containerRect.height) / (2 * scale));
+        
+        // 应用严格的平移限制
+        // 水平方向：允许左右平移到边缘
+        translateX = Math.max(-maxTranslateX, Math.min(maxTranslateX, translateX));
+        
+        // 垂直方向：确保图片边缘在合理范围内
+        // 向上滑动：限制图片顶部不能超过保存按钮区域（header区域）
+        // 更严格的限制，确保图片顶部始终在header下方
+        const headerHeight = 120; // 保存按钮和评分区域的高度
+        const maxUpTranslate = Math.max(0, Math.min(maxTranslateY, (imgRect.height * 0.3) / scale)); // 最多向上移动图片高度的30%
+        
+        // 向下滑动：限制图片顶部不能太低于保存按钮区域
+        // 确保图片顶部始终在合理的查看位置
+        const maxDownTranslate = Math.max(0, Math.min(maxTranslateY, (imgRect.height * 0.2) / scale)); // 最多向下移动图片高度的20%
+        
+        translateY = Math.max(-maxUpTranslate, Math.min(maxDownTranslate, translateY));
         
         // 应用平移
         img.style.setProperty('--translate-x', translateX + 'px');
