@@ -16,11 +16,13 @@ interface AdjustmentPanelProps {
   adjustmentResults?: string[];
   onApplyResult?: (imageUrl: string) => void;
   adjustmentProgress?: { current: number; total: number } | null;
+  onCancel?: () => void;
+  canCancel?: boolean;
 }
 
 type Preset = { name: string; prompt: string };
 
-const AdjustmentPanel: React.FC<AdjustmentPanelProps> = ({ onApplyAdjustment, isLoading, currentImage, onError, adjustmentResults, onApplyResult, adjustmentProgress }) => {
+const AdjustmentPanel: React.FC<AdjustmentPanelProps> = ({ onApplyAdjustment, isLoading, currentImage, onError, adjustmentResults, onApplyResult, adjustmentProgress, onCancel, canCancel }) => {
   const [selectedPresetPrompt, setSelectedPresetPrompt] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const [aiPresets, setAiPresets] = useState<Preset[]>([]);
@@ -226,17 +228,37 @@ const AdjustmentPanel: React.FC<AdjustmentPanelProps> = ({ onApplyAdjustment, is
 
       {activePrompt && (
         <div className="animate-fade-in flex flex-col gap-4">
-            <button
+            {canCancel && isLoading ? (
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={handleApply}
+                  className="flex-1 bg-gradient-to-br from-blue-600 to-blue-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-blue-500/20 disabled:from-blue-800 disabled:to-blue-700 disabled:shadow-none disabled:cursor-not-allowed text-base"
+                  disabled={true}
+                >
+                  {adjustmentProgress 
+                    ? `调整中... ${adjustmentProgress.current}/${adjustmentProgress.total}` 
+                    : `调整中... (${imageCount}张)`}
+                </button>
+                <button
+                  onClick={onCancel}
+                  className="bg-red-600 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/40 hover:-translate-y-px active:scale-95 text-base"
+                >
+                  取消
+                </button>
+              </div>
+            ) : (
+              <button
                 onClick={handleApply}
                 className="w-full bg-gradient-to-br from-blue-600 to-blue-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-base disabled:from-blue-800 disabled:to-blue-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
                 disabled={isLoading || !activePrompt.trim()}
-            >
+              >
                 {isLoading ? (
                   adjustmentProgress 
                     ? `调整中... ${adjustmentProgress.current}/${adjustmentProgress.total}` 
                     : `调整中... (${imageCount}张)`
                 ) : `应用调整`}
-            </button>
+              </button>
+            )}
         </div>
       )}
 

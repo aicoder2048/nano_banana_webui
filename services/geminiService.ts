@@ -324,7 +324,8 @@ export const generateAdjustedImages = async (
     prompt: string, 
     count: number = 1,
     variationIntensity: string = 'moderate',
-    onProgress?: (imageUrl: string, current: number, total: number) => void
+    onProgress?: (imageUrl: string, current: number, total: number) => void,
+    abortSignal?: AbortSignal
 ): Promise<string[]> => {
     try {
         const results: string[] = [];
@@ -366,6 +367,12 @@ export const generateAdjustedImages = async (
         const variations = variationSets[variationIntensity] || variationSets.moderate;
         
         for (let i = 0; i < count; i++) {
+            // 检查是否已被取消
+            if (abortSignal?.aborted) {
+                console.log(`调整图片生成已取消，已完成 ${results.length}/${count} 张`);
+                break;
+            }
+            
             try {
                 const imagePart = await fileToGenerativePart(imageFile);
                 
@@ -496,7 +503,8 @@ export const generateFusedImages = async (
     prompt: string, 
     count: number = 1,
     variationIntensity: string = 'moderate',
-    onProgress?: (imageUrl: string, current: number, total: number) => void
+    onProgress?: (imageUrl: string, current: number, total: number) => void,
+    abortSignal?: AbortSignal
 ): Promise<string[]> => {
     try {
         const results: string[] = [];
@@ -545,6 +553,12 @@ export const generateFusedImages = async (
         
         // 顺序生成每张图片
         for (let i = 0; i < count; i++) {
+            // 检查是否已被取消
+            if (abortSignal?.aborted) {
+                console.log(`合成图片生成已取消，已完成 ${results.length}/${count} 张`);
+                break;
+            }
+            
             try {
                 // 构建 prompt
                 let fullPrompt = `Fuse the images. The main image is the one I'm editing. `;

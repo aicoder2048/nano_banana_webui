@@ -138,6 +138,26 @@ const EditorView: React.FC<{
   // Adjustment results state for multiple images
   const [adjustmentResults, setAdjustmentResults] = useState<string[]>([]);
   const [adjustmentProgress, setAdjustmentProgress] = useState<{ current: number; total: number } | null>(null);
+  
+  // AbortController for canceling batch generation
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
+  
+  // Cancel batch generation
+  const handleCancelGeneration = useCallback(() => {
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+      setIsLoading(false);
+      setError('生成已取消');
+      
+      // 清理进度状态，但保留已生成的结果
+      setTimeout(() => {
+        setFusionProgress(null);
+        setAdjustmentProgress(null);
+        setError(null); // 清除取消消息
+      }, 2000);
+    }
+  }, [abortController]);
 
   const currentImageFile = history[historyIndex];
   const originalImageFile = history[0];
@@ -310,6 +330,10 @@ const EditorView: React.FC<{
       setError(null);
       setAdjustmentProgress({ current: 0, total: count }); // 设置初始进度
       
+      // 创建 AbortController
+      const controller = new AbortController();
+      setAbortController(controller);
+      
       try {
         const results = await generateAdjustedImages(
           currentImageFile,
@@ -323,7 +347,8 @@ const EditorView: React.FC<{
               return newResults;
             });
             setAdjustmentProgress({ current, total });
-          }
+          },
+          controller.signal
         );
         
         // 确保所有结果都被设置
@@ -334,6 +359,7 @@ const EditorView: React.FC<{
         setError(error.message || '调整过程中发生错误');
       } finally {
         setIsLoading(false);
+        setAbortController(null); // 清理 AbortController
         // 几秒后清除进度状态
         setTimeout(() => setAdjustmentProgress(null), 3000);
       }
@@ -354,6 +380,10 @@ const EditorView: React.FC<{
       setError(null);
       setFusionProgress({ current: 0, total: count }); // 设置初始进度
       
+      // 创建 AbortController
+      const controller = new AbortController();
+      setAbortController(controller);
+      
       try {
         const results = await generateFusedImages(
           currentImageFile, 
@@ -365,7 +395,8 @@ const EditorView: React.FC<{
             // 每生成一张图片就立即添加到结果中
             setFusionResults(prev => [...prev, imageUrl]);
             setFusionProgress({ current, total });
-          }
+          },
+          controller.signal
         );
         
         // 如果需要，可以将第一张设为当前图片
@@ -379,6 +410,7 @@ const EditorView: React.FC<{
         setError(e instanceof Error ? e.message : '生成合成图片时出错');
       } finally {
         setIsLoading(false);
+        setAbortController(null); // 清理 AbortController
         setFusionProgress(null); // 清空进度状态
       }
     }
@@ -712,7 +744,7 @@ const EditorView: React.FC<{
                       </div>
                   </div>
               )}
-              {activeTab === 'adjust' && <AdjustmentPanel onApplyAdjustment={handleApplyAdjustment} isLoading={isLoading} currentImage={currentImageFile} onError={setError} adjustmentResults={adjustmentResults} onApplyResult={handleApplyAdjustmentResult} adjustmentProgress={adjustmentProgress} />}
+              {activeTab === 'adjust' && <AdjustmentPanel onApplyAdjustment={handleApplyAdjustment} isLoading={isLoading} currentImage={currentImageFile} onError={setError} adjustmentResults={adjustmentResults} onApplyResult={handleApplyAdjustmentResult} adjustmentProgress={adjustmentProgress} onCancel={handleCancelGeneration} canCancel={!!abortController} />}
               {activeTab === 'filters' && <FilterPanel onApplyFilter={handleApplyFilter} isLoading={isLoading} currentImage={currentImageFile} onError={setError} />}
               {activeTab === 'texture' && <TexturePanel onApplyTexture={handleApplyTexture} isLoading={isLoading} currentImage={currentImageFile} onError={setError} />}
               {activeTab === 'erase' && <ErasePanel onRemoveBackground={handleRemoveBackground} isLoading={isLoading} />}
@@ -732,6 +764,8 @@ const EditorView: React.FC<{
                   fusionResults={fusionResults}
                   onApplyResult={handleApplyFusionResult}
                   fusionProgress={fusionProgress}
+                  onCancel={handleCancelGeneration}
+                  canCancel={!!abortController}
                 />
               )}
             </div>
